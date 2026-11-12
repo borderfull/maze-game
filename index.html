@@ -1,251 +1,62 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<title>Asylum Maze</title>
-<script src="./vendor/react.js"></script>
-<script src="./vendor/react-dom.js"></script>
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;family=Courier+Prime:wght@400;700&amp;family=Old+Standard+TT:wght@400;700&amp;display=swap">
-<style>
-body{margin:0;background:#ebe2cb}
-a{color:#5c2a68}a:hover{color:#2b262d}
-button{font-family:inherit}
-button:focus-visible{outline:3px solid #5c2a68;outline-offset:3px}
-</style>
-</helmet>
-<div style="min-height: 100vh; box-sizing: border-box; position: relative; background: #ebe2cb; color: #221e24; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 16px; line-height: 1.5; padding: 28px 16px 56px">
-<svg width="0" height="0" aria-hidden="true" style="position: absolute"><filter id="inkbleedMain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="noise"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap></filter></svg>
-<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(43,38,45,0.025) 0 3px, transparent 3px 41px), radial-gradient(ellipse at 18% 26%, rgba(120,100,70,0.08), transparent 45%), radial-gradient(ellipse at 86% 78%, rgba(120,100,70,0.10), transparent 40%)"></div>
-<div style="position: relative; max-width: 1180px; margin: 0 auto; min-height: calc(100vh - 56px); display: flex; flex-direction: column; gap: {{stackGap}}">
-
-<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 2px solid #2b262d; padding-bottom: 12px">
-<div style="display: flex; flex-direction: column; gap: 4px">
-<h1 style="margin: 0; font-family: 'Old Standard TT', Georgia, serif; font-size: {{titleSize}}; line-height: 1; font-weight: 700">Asylum Maze</h1>
-<sc-if value="{{showIntro}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 17px">Every decision reshapes the path ahead. The odds depend on where you come from and where you ask.</p></sc-if>
-</div>
-<div role="group" aria-label="Game status" style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start">
-<sc-if value="{{showTime}}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.12em">TIME ON FILE</span>
-<span role="timer" style="font-size: 34px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums">{{clock}}</span>
-</div>
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.12em">IN PROCEDURE</span>
-<div aria-hidden="true" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; min-height: 34px; max-width: 260px">
-<sc-if value="{{hasYears}}" hint-placeholder-val="{{ false }}"><span style="font-size: 20px; font-weight: 700">{{yearsLabel}}</span></sc-if>
-<sc-for list="{{tally}}" as="g" hint-placeholder-count="2">
-<span style="position: relative; font-family: 'Old Standard TT', serif; font-size: 30px; line-height: 1; letter-spacing: 1px">{{g.bars}}<sc-if value="{{g.full}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; left: -3px; right: -3px; top: 50%; height: 2px; background: #2b262d; transform: rotate(-24deg)"></span></sc-if></span>
-</sc-for>
-</div>
-<span style="font-size: 15px; font-weight: 700">{{monthsLabel}}</span>
-</div>
-</sc-if>
-<span style="display: inline-block; border: 3px solid #5c2a68; color: #5c2a68; padding: 5px 10px; font-family: 'Special Elite', monospace; font-size: 17px; letter-spacing: 0.12em; transform: rotate(-4deg); max-width: 100%; box-sizing: border-box">{{hudStamp}}</span>
-</div>
-</header>
-
-<sc-if value="{{isSetup}}" hint-placeholder-val="{{ true }}">
-<section style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; padding-bottom: 16px">
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 1. NATIONALITY OF APPLICANT (tick one)</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px">
-<sc-for list="{{natItems}}" as="item" hint-placeholder-count="8">
-<button type="button" onClick="{{item.pick}}" aria-pressed="{{item.pressed}}" style="{{item.style}}">{{item.box}}  {{item.name}}</button>
-</sc-for>
-</div>
-</div>
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 2. COUNTRY OF APPLICATION (tick one)</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px">
-<sc-for list="{{destItems}}" as="item" hint-placeholder-count="5">
-<button type="button" onClick="{{item.pick}}" aria-pressed="{{item.pressed}}" style="{{item.style}}">{{item.box}}  {{item.name}}</button>
-</sc-for>
-</div>
-</div>
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 3. HOW IT WORKS</h2>
-<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 24px; font-size: 16px; line-height: 1.45">
-<li>— Two exits: INT (international protection, top right) and NAT (national humanitarian protection, top left). Both are open. Reach either one.</li>
-<li>— How hard each exit is to reach depends on your nationality and the country you chose. The harder way costs more months.</li>
-<li>— Every step re-issues a section of the maze ahead of you (the washed patch). Walls cost two weeks.</li>
-<li>— CHK costs time. DOC costs a month now but makes the rest of the way cheaper. AID saves time. RET sends you back.</li>
-<li>— Play with the arrow keys (← ↑ →) or A, W, D — or the buttons.</li>
-</ul>
-</div>
-<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; border-top: 2px solid #2b262d; padding-top: 16px">
-<p style="margin: 0; font-size: 16px">Reported recognition rate in <strong>{{destName}}</strong>: <strong>{{reportedPct}}</strong> <span style="color: #3f3b3e">(first-instance decisions, 2014)</span></p>
-<button type="button" onClick="{{start}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; cursor: pointer">Submit application</button>
-</div>
-</section>
-</sc-if>
-
-<sc-if value="{{isPlay}}" hint-placeholder-val="{{ false }}">
-<section ref="{{playRef}}" tabIndex="0" onKeyDown="{{onKey}}" onPointerDown="{{grabFocus}}" aria-label="Maze game. Use the arrow keys or A, W and D." style="flex: 1; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; justify-content: center; outline: none">
-<div style="flex: 0 1 auto; width: max(300px, min(calc(100vh - 200px), calc(100vw - 470px), 780px)); max-width: 100%; display: flex; flex-direction: column; gap: 8px">
-<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 15px">
-<span>{{natName}} → {{destName}}</span>
-<span>Step {{steps}} · Route to INT {{routeInt}} · NAT {{routeNat}}</span>
-</div>
-<div style="position: relative; width: 100%">
-<div aria-hidden="true" style="position: absolute; inset: 0; display: grid; grid-template-columns: {{gridCols}}; filter: url(#inkbleedMain); pointer-events: none">
-<sc-for list="{{cells}}" as="cell" hint-placeholder-count="121"><div style="{{cell.wallStyle}}"></div></sc-for>
-</div>
-<div role="grid" aria-label="Maze" style="position: relative; display: grid; grid-template-columns: {{gridCols}}; width: 100%">
-<sc-for list="{{cells}}" as="cell" hint-placeholder-count="121">
-<div role="gridcell" aria-label="{{cell.label}}" style="aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden">
-<sc-if value="{{cell.isTrail}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="color: #3f3b3e; font-size: 18px; line-height: 1">×</span></sc-if>
-<sc-if value="{{cell.isPlayer}}" hint-placeholder-val="{{ false }}">
-<span style="width: 62%; height: 62%; border-radius: 50%; background: #5c2a68; display: flex; align-items: center; justify-content: center">
-<svg viewBox="0 0 24 24" width="62%" height="62%" aria-hidden="true" style="{{cell.arrowStyle}}"><path d="M12 3 L20 20 L12 15.5 L4 20 Z" fill="#f3ecda"></path></svg>
-</span>
-</sc-if>
-<sc-if value="{{cell.isGoalInt}}" hint-placeholder-val="{{ false }}"><span style="width: 84%; height: 62%; border: 3px double #5c2a68; color: #5c2a68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; transform: rotate(-3deg)">INT</span></sc-if>
-<sc-if value="{{cell.isGoalNat}}" hint-placeholder-val="{{ false }}"><span style="width: 84%; height: 62%; border: 3px double #8f2520; color: #8f2520; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; transform: rotate(3deg)">NAT</span></sc-if>
-<sc-if value="{{cell.hasMark}}" hint-placeholder-val="{{ false }}"><span style="{{cell.markStyle}}">{{cell.markText}}</span></sc-if>
-</div>
-</sc-for>
-</div>
-</div>
-</div>
-
-<aside style="flex: 0 1 380px; min-width: 280px; display: flex; flex-direction: column; gap: 20px">
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 4. NEXT DECISION</h2>
-<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
-<button type="button" onClick="{{goLeft}}" style="min-height: 72px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☐ Left<span style="font-size: 12px; color: #3f3b3e">← / A</span></button>
-<button type="button" onClick="{{goStraight}}" style="min-height: 72px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☒ Straight<span style="font-size: 12px">↑ / W</span></button>
-<button type="button" onClick="{{goRight}}" style="min-height: 72px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☐ Right<span style="font-size: 12px; color: #3f3b3e">→ / D</span></button>
-</div>
-<p style="margin: 0; font-size: 15px; color: #3f3b3e">Relative to your arrow. Walls cost two weeks. Click the maze if the keys don't respond.</p>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 5. RECORD OF PROCEEDINGS</h2>
-<ol aria-live="polite" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
-<sc-for list="{{log}}" as="entry" hint-placeholder-count="3">
-<li style="{{entry.style}}">{{entry.text}}</li>
-</sc-for>
-</ol>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 10px">
-<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 6. KEY</h2>
-<div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px">
-<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 44px; height: 24px; border: 3px double #5c2a68; color: #5c2a68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px">INT</span><span>International protection (Geneva / ECHR)</span></div>
-<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 44px; height: 24px; border: 3px double #8f2520; color: #8f2520; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px">NAT</span><span>National humanitarian protection</span></div>
-<sc-for list="{{legend}}" as="it" hint-placeholder-count="4">
-<div style="display: flex; align-items: center; gap: 10px"><span style="{{it.stampStyle}}">{{it.stamp}}</span><span>{{it.name}} {{it.hint}}</span></div>
-</sc-for>
-<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 34px; height: 20px; background: rgba(180,160,140,0.32); border: 2px solid #2b262d"></span><span>Section just re-issued</span></div>
-</div>
-<button type="button" onClick="{{restart}}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 15px; cursor: pointer">Withdraw &amp; restart</button>
-</div>
-</aside>
-</section>
-</sc-if>
-
-<sc-if value="{{isEnd}}" hint-placeholder-val="{{ false }}">
-<section style="display: flex; flex-direction: column; gap: 22px; max-width: 760px">
-<h2 style="{{endStampStyle}}">{{outcomeTitle}}</h2>
-<p style="margin: 0; font-size: 17px; line-height: 1.55"><strong>{{outcomeLead}}</strong> {{outcomeText}}</p>
-<h3 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">WHAT YOU WERE TOLD vs. WHAT YOU FACED</h3>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
-<sc-for list="{{reveal}}" as="rv" hint-placeholder-count="3">
-<div style="border: 2px solid #2b262d; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.08em">{{rv.k}}</span>
-<span style="{{rv.vStyle}}">{{rv.v}}</span>
-<span style="font-size: 14px; color: #3f3b3e">{{rv.s}}</span>
-</div>
-</sc-for>
-</div>
-<p style="margin: 0; font-size: 17px; line-height: 1.55">{{explain}}</p>
-<div style="display: flex; flex-direction: column; gap: 8px; border-top: 2px solid #2b262d; padding-top: 14px">
-<sc-for list="{{summary}}" as="s" hint-placeholder-count="6">
-<div style="display: flex; align-items: baseline; gap: 8px; font-size: 16px"><span>{{s.label}}</span><span style="flex: 1; min-width: 16px; border-bottom: 2px dotted #3f3b3e; transform: translateY(-4px)"></span><span style="font-family: 'Old Standard TT', serif; font-size: 20px; font-weight: 700">{{s.value}}</span></div>
-</sc-for>
-</div>
-<p style="margin: 0; font-size: 16px; font-weight: 700; border-top: 2px solid #2b262d; padding-top: 14px">Based on European (EU/EFTA) asylum decisions from 2014 analyzed by Arjen Leerkes (WODC, 2015).</p>
-<p style="margin: 0; font-size: 14px; color: #3f3b3e">Your odds are an estimate for an average applicant of your nationality in that country, calculated from the figures in the report below. Source: Leerkes, A. (2015). How (un)restrictive are we? ‘Adjusted’ and ‘expected’ asylum recognition rates in Europe. WODC Cahier 2015-10.</p>
-<div style="display: flex; flex-wrap: wrap; gap: 12px">
-<button type="button" onClick="{{start}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; cursor: pointer">File again</button>
-<button type="button" onClick="{{restart}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; cursor: pointer">Change nationality or country</button>
-</div>
-</section>
-</sc-if>
-
-</div>
-</div>
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
-/* ===== DATA — Leerkes (2015), WODC Cahier 2015-10, first-instance decisions 2014 =====
-   All figures checked against the report PDF: observed rates (Tables 1–2), adjusted rates
-   (Models 3 and 6, Appendix 3 interval midpoints); odds use Appendix 2 Models 2 and 5 (m2/m5 = country,
-   orAll/orInt = nationality vs Afghanistan), as in the report's Appendix 1 step 5. */
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Asylum Maze</title><meta name="description" content="A maze game about seeking asylum in Europe. The reported recognition rate is not your odds: where you come from changes how long the way takes."><meta property="og:title" content="Asylum Maze"><meta property="og:description" content="Every decision reshapes the path. The odds depend on where you come from and where you ask."><meta property="og:type" content="website"><meta name="theme-color" content="#ebe2cb"><script async src="https://www.googletagmanager.com/gtag/js?id=G-G3LPX71J7E"></script> <script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'granted'});
+gtag('js', new Date());
+gtag('config', 'G-G3LPX71J7E');</script> <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231c1814'%3E%3C/rect%3E%3Cg fill='none' stroke='%23f1e9d8' stroke-width='2' stroke-linecap='round' opacity='0.9'%3E%3Cpath d='M6,22 C16,16 24,26 32,22 S48,16 58,24'%3E%3C/path%3E%3Cpath d='M6,33 C16,27 24,37 32,33 S48,27 58,35'%3E%3C/path%3E%3Cpath d='M6,44 C16,38 24,48 32,44 S48,38 58,46'%3E%3C/path%3E%3C/g%3E%3Ccircle cx='40' cy='29' r='3.4' fill='%23b15a3a'%3E%3C/circle%3E%3C/svg%3E"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&amp;display=swap" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;display=swap&amp;text=%20%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F0123456789%3A%3B%3C%3D%3E%3F%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~%C2%A7%C2%B7%E2%80%93%E2%80%94%C3%97%E2%86%92%E2%86%90%E2%86%91%E2%98%90%E2%98%92%E2%80%99%E2%80%98%E2%80%9C%E2%80%9D" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&amp;display=swap&amp;text=Asylum%20Maze%7C0123456789%25yrmo%20." media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&amp;display=swap"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;display=swap&amp;text=%20%21%22%23%24%25%26%27%28%29%2A%2B%2C-.%2F0123456789%3A%3B%3C%3D%3E%3F%40ABCDEFGHIJKLMNOPQRSTUVWXYZ%5B%5C%5D%5E_%60abcdefghijklmnopqrstuvwxyz%7B%7C%7D~%C2%A7%C2%B7%E2%80%93%E2%80%94%C3%97%E2%86%92%E2%86%90%E2%86%91%E2%98%90%E2%98%92%E2%80%99%E2%80%98%E2%80%9C%E2%80%9D"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:wght@400;700&amp;display=swap&amp;text=Asylum%20Maze%7C0123456789%25yrmo%20."></noscript> <style>:root{--paper:#ebe2cb;--paper-hi:#f3ecda;--ink:#221e24;--violet:#5c2a68;--red:#8f2520;--pencil:#3f3b3e;--wash:rgba(180,160,140,0.32);--trail:rgba(92,42,104,0.07);--used:#77706a;--type:'Special Elite','Courier New',Courier,monospace;--body:'Courier Prime','Courier New',Courier,monospace;--serif:'Old Standard TT',Georgia,'Times New Roman',serif}*{box-sizing:border-box}html,body{margin:0}body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-text-size-adjust:100%;min-height:100vh}body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(90deg,rgba(43,38,45,0.025) 0 3px,transparent 3px 41px),radial-gradient(ellipse at 18% 26%,rgba(120,100,70,0.08),transparent 45%),radial-gradient(ellipse at 86% 78%,rgba(120,100,70,0.10),transparent 40%)}[hidden]{display:none !important}button{font-family:inherit;touch-action:manipulation;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid var(--violet);outline-offset:3px}a{color:var(--violet)}a:hover{color:var(--ink)}.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:24px 16px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;gap:24px}body.is-play .wrap{gap:14px;padding-top:16px;padding-bottom:16px}body.is-play .kicker,body.is-play .lede{display:none}body.is-play h1{font-size:30px;margin:0}body.is-play header{padding-bottom:10px;align-items:center}body.is-play .hud .clock{font-size:26px}body.is-play .tg{font-size:24px}body.is-play .tally{min-height:26px}body.is-play .hud{gap:14px}body.is-play .stamp{font-size:14px;padding:3px 8px}header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:2px solid var(--ink);padding-bottom:14px}.kicker{font-family:var(--type);font-size:13px;letter-spacing:.12em}h1{margin:4px 0 4px;font-family:var(--serif);font-size:46px;line-height:1;font-weight:700;letter-spacing:.01em}.lede{margin:0;font-size:17px}.hud{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-start}.hud .k{display:block;font-family:var(--type);font-size:13px;letter-spacing:.12em;margin-bottom:4px}.hud .clock{font-size:34px;line-height:1;font-weight:700;font-variant-numeric:tabular-nums}.tally{display:flex;flex-wrap:wrap;gap:10px;align-items:center;min-height:34px;max-width:260px}.tg{position:relative;font-family:var(--serif);font-size:30px;line-height:1;letter-spacing:1px}.tg.full::after{content:"";position:absolute;left:-3px;right:-3px;top:50%;height:2px;background:var(--ink);transform:rotate(-24deg)}.yrs{font-size:20px;font-weight:700}body.is-setup .hud-time{display:none}.months-num{display:block;font-size:15px;font-weight:700;margin-top:2px}.stamp{display:inline-block;border:3px solid var(--red);color:var(--red);padding:5px 10px;font-family:var(--type);font-size:18px;letter-spacing:.12em;transform:rotate(-4deg);white-space:nowrap}.stamp.violet{border-color:var(--violet);color:var(--violet)}.sec-title{margin:0;font-family:var(--type);font-weight:400;font-size:15px;letter-spacing:.1em}.panel{display:flex;flex-direction:column;gap:10px}.setup{flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px;padding:8px 0 16px}.how{margin:10px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 24px}.how li{font-size:16px;line-height:1.45;padding-left:22px;position:relative}.how li::before{content:"—";position:absolute;left:0}.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:10px}.chip{min-height:48px;padding:10px 14px;text-align:left;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:16px;cursor:pointer}.chip::before{content:"☐ "}.chip[aria-pressed="true"]{background:var(--violet);border-color:var(--violet);color:var(--paper-hi)}.chip[aria-pressed="true"]::before{content:"☒ "}.setup-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;border-top:2px solid var(--ink);padding-top:16px}.setup-foot p{margin:0;font-size:16px}.note{color:var(--pencil)}.btn{min-height:48px;padding:0 22px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:17px;cursor:pointer}.btn.primary{background:var(--violet);border-color:var(--violet);color:var(--paper-hi)}.btn.small{min-height:44px;font-size:15px;padding:0 16px;align-self:flex-start}.play{flex:1;min-height:0;display:flex;gap:32px;align-items:flex-start;justify-content:center}.board{flex:none;display:flex;flex-direction:column;gap:8px;width:max(300px,min(calc(100vh - 200px),calc(100vw - 470px),780px));width:max(300px,min(calc(100dvh - 200px),calc(100vw - 470px),780px))}.meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:15px}.frame{position:relative;width:100%}.frame:focus{outline:none}.frame:focus-visible{outline:3px solid var(--violet);outline-offset:4px}#walls{position:absolute;inset:0;display:grid;filter:url(#inkbleed);pointer-events:none}.wcell{transition:background-color .35s ease}#maze{position:relative;display:grid;width:100%}.cell{aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}.trail{color:var(--pencil);font-size:clamp(11px,2.6vw,18px);line-height:1}.tok{width:62%;height:62%;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center}.tok svg{width:62%;height:62%;transition:transform .2s ease}.goal{width:84%;height:62%;border:3px double var(--violet);color:var(--violet);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:clamp(8px,1.8vw,13px);transform:rotate(-3deg)}.goal.nat{border-color:var(--red);color:var(--red);transform:rotate(3deg)}.mk{padding:1px 2px;border:2px solid currentColor;font-weight:700;font-size:clamp(8px,1.8vw,12px);line-height:1.15;white-space:nowrap}.mk.solid{background:var(--red);border-color:var(--red);color:var(--paper-hi) !important}.mk.double{border-style:double;border-width:3px}.mk.used{color:var(--used) !important;background:transparent !important;border-color:var(--used) !important;text-decoration:line-through}aside{flex:0 1 380px;min-width:280px;display:flex;flex-direction:column;gap:20px;max-height:calc(100vh - 130px);max-height:calc(100dvh - 130px);overflow-y:auto}.swatch{flex:none;width:34px;height:20px;background:var(--wash);border:2px solid var(--ink)}.controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.ctrl{min-height:72px;border:2px solid var(--ink);background:transparent;color:var(--ink);font-size:17px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:transform .08s ease,background-color .12s ease}.ctrl.primary{background:var(--violet);border-color:var(--violet);color:var(--paper-hi)}.ctrl.active{transform:scale(.95) rotate(-1deg);background:rgba(92,42,104,0.18)}.ctrl.primary.active{background:#40184a}.kbd{font-size:13px;font-weight:400}.help{margin:0;font-size:15px;color:var(--pencil)}#log{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}#log li{font-size:16px;line-height:1.45;color:var(--pencil)}#log li:first-child{color:var(--ink);font-weight:700}.legend{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;font-size:15px}.legend div{display:flex;align-items:center;gap:10px}.legend .mk{font-size:13px;padding:1px 6px}.legend .goal{flex:none;width:44px;height:24px;font-size:12px}.end{display:flex;flex-direction:column;gap:22px;max-width:760px}.end-stamp{align-self:flex-start;margin:0;font-size:28px;padding:8px 18px;border-width:4px}.end p{margin:0;font-size:17px;line-height:1.55}.route-line{font-weight:700}.ledger{display:flex;flex-direction:column;gap:8px;border-top:2px solid var(--ink);padding-top:14px}.ledger div{display:flex;align-items:baseline;gap:8px;font-size:16px}.ledger .dots{flex:1;border-bottom:2px dotted var(--pencil);transform:translateY(-4px);min-width:16px}.ledger .v{font-family:var(--serif);font-size:20px;font-weight:700}.reveal{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}.reveal div{border:2px solid var(--ink);padding:12px 14px;display:flex;flex-direction:column;gap:4px}.reveal .k{font-family:var(--type);font-size:13px;letter-spacing:.08em}.reveal .v{font-family:var(--serif);font-size:32px;font-weight:700;line-height:1.1}.reveal .s{font-size:14px;color:var(--pencil)}.reveal .before .v{text-decoration:line-through;text-decoration-thickness:2px;color:var(--pencil)}.basis{font-size:16px !important;font-weight:700;border-top:2px solid var(--ink);padding-top:14px}.source{font-size:14px !important;color:var(--pencil)}.row{display:flex;flex-wrap:wrap;gap:12px}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}@media (hover:none) and (pointer:coarse){.kbd,.kbd-help{display:none}}@media (max-width:880px){.play{flex-direction:column;align-items:stretch;gap:16px}.board{width:100%;max-width:calc(100dvh - 300px);min-width:min(100%,300px);align-self:center}aside{flex:none;min-width:0;max-height:none;overflow:visible}}@media (max-width:560px){.stamp{white-space:normal;font-size:15px;max-width:100%}h1{font-size:36px}.hud{width:100%;justify-content:space-between}.hud .clock{font-size:28px}body.is-play h1{font-size:26px}}@media (prefers-reduced-motion:reduce){*{transition:none !important}}</style> </head><body class="is-setup"><svg width="0" height="0" aria-hidden="true" style="position:absolute"><filter id="inkbleed"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="noise"/><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"/></filter></svg><div class="wrap"><header><div><h1>Asylum Maze</h1><p class="lede">Every decision reshapes the path ahead. The odds depend on where you come from and where you ask.</p></div><div class="hud" role="group" aria-label="Game status"><div class="hud-time"><span class="k">TIME ON FILE</span><span class="clock" id="clock" role="timer">00:00</span></div><div class="hud-time"><span class="k">IN PROCEDURE</span><div class="tally" id="tally" aria-hidden="true"></div><span class="months-num" id="months">0.0 months</span></div><span class="stamp violet" id="hud-stamp">REPORTED RECOGNITION RATE 58%</span></div></header><noscript><p>This game needs JavaScript turned on.</p></noscript><section id="setup" class="setup" aria-labelledby="setup-title"><h2 class="sr" id="setup-title">Application</h2><div><h2 class="sec-title">§ 1. NATIONALITY OF APPLICANT (tick one)</h2><div class="chips" id="nat-list"><button type="button" class="chip" aria-pressed="false">Syria</button><button type="button" class="chip" aria-pressed="false">Eritrea</button><button type="button" class="chip" aria-pressed="false">Iraq</button><button type="button" class="chip" aria-pressed="true">Afghanistan</button><button type="button" class="chip" aria-pressed="false">Iran</button><button type="button" class="chip" aria-pressed="false">Somalia</button><button type="button" class="chip" aria-pressed="false">Myanmar</button><button type="button" class="chip" aria-pressed="false">Nigeria</button><button type="button" class="chip" aria-pressed="false">Albania</button></div></div><div><h2 class="sec-title">§ 2. COUNTRY OF APPLICATION (tick one)</h2><div class="chips" id="dest-list"><button type="button" class="chip" aria-pressed="true">Italy</button><button type="button" class="chip" aria-pressed="false">Switzerland</button><button type="button" class="chip" aria-pressed="false">Malta</button><button type="button" class="chip" aria-pressed="false">Finland</button><button type="button" class="chip" aria-pressed="false">Bulgaria</button></div></div><div><h2 class="sec-title">§ 3. HOW IT WORKS</h2><ul class="how"><li>Two exits: INT (international protection, top right) and NAT (national humanitarian protection, top left). Both are open. Reach either one.</li><li>How hard each exit is to reach depends on your nationality and the country you chose. The harder way costs more months.</li><li>Every step re-issues a section of the maze ahead of you (the washed patch). Walls cost two weeks.</li><li>CHK costs time. DOC costs a month now but makes the rest of the way cheaper. AID saves time. RET sends you back.</li><li class="kbd-help">Play with the arrow keys (← ↑ →) or A, W, D — or the buttons.</li></ul></div><div class="setup-foot"><p>Reported recognition rate in <strong id="rate-country">Italy</strong>: <strong id="rate">58%</strong> <span class="note">(first-instance decisions, 2014)</span></p><button type="button" class="btn primary" id="start">Submit application</button></div></section><section id="play" class="play" hidden aria-label="Maze"><div class="board"><div class="meta"><span><span id="who-nat"></span> → <span id="who-dest"></span></span><span>Step <span id="steps">0</span> · Route to INT <span id="route-int">0</span> · NAT <span id="route-nat">0</span></span></div><div class="frame" id="frame" tabindex="-1"><div id="walls" aria-hidden="true"></div><div id="maze" role="grid" aria-label="Maze grid"></div></div></div><aside><div class="panel"><h2 class="sec-title">§ 4. NEXT DECISION</h2><div class="controls"><button type="button" class="ctrl" id="btn-left" aria-keyshortcuts="ArrowLeft A">☐ Left<span class="kbd" aria-hidden="true">← / A</span></button><button type="button" class="ctrl primary" id="btn-straight" aria-keyshortcuts="ArrowUp W">☒ Straight<span class="kbd" aria-hidden="true">↑ / W</span></button><button type="button" class="ctrl" id="btn-right" aria-keyshortcuts="ArrowRight D">☐ Right<span class="kbd" aria-hidden="true">→ / D</span></button></div><p class="help">Relative to your arrow. Walls cost two weeks.</p></div><div class="panel"><h2 class="sec-title">§ 5. RECORD OF PROCEEDINGS</h2><ol id="log" aria-live="polite"></ol></div><div class="panel"><h2 class="sec-title">§ 6. KEY</h2><div class="legend" id="legend"></div><button type="button" class="btn small" id="restart">Withdraw &amp; restart</button></div></aside></section><section id="end" class="end" hidden aria-labelledby="end-title"><h2 id="end-title" class="stamp end-stamp violet" tabindex="-1"></h2><p id="end-text"></p><h3 class="sec-title">WHAT YOU WERE TOLD vs. WHAT YOU FACED</h3><div class="reveal" id="reveal"></div><p id="end-explain"></p><div class="ledger" id="summary"></div><p class="basis">Based on European (EU/EFTA) asylum decisions from 2014 analyzed by Arjen Leerkes (WODC, 2015).</p><p class="source">Your odds are an estimate for an average applicant of your nationality in that country, calculated from the figures in the report below. Source: Leerkes, A. (2015). How (un)restrictive are we? ‘Adjusted’ and ‘expected’ asylum recognition rates in Europe. WODC Cahier 2015-10.</p><div class="row"><button type="button" class="btn primary" id="again">File again</button><button type="button" class="btn" id="change">Change nationality or country</button></div></section></div> <script>(function () {
+'use strict';
 var DESTINATIONS = [
-  { id: 'IT', name: 'Italy',       observed: 0.58, observedInt: 0.32, adjAll: 0.68, adjInt: 0.49, m2: 10.16, m5: 1.86, grid: 11, aid: 1.0,
-    story: 'Italy’s reported rate looks moderate because many of its applicants came from countries with low recognition odds. Adjusted for who applies, it was the most permissive of the larger countries, with national humanitarian protection doing much of the work.' },
-  { id: 'CH', name: 'Switzerland', observed: 0.70, observedInt: 0.40, adjAll: 0.57, adjInt: 0.28, m2: 5.51, m5: 0.40, grid: 11, aid: 1.6,
-    story: 'Switzerland grants much of its protection through national status. On international grounds alone, its adjusted rate is low.' },
-  { id: 'MT', name: 'Malta',       observed: 0.73, observedInt: 0.63, adjAll: 0.57, adjInt: 0.48, m2: 5.26, m5: 1.96, grid: 9,  aid: 1.6,
-    story: 'Malta’s reported rate is higher than its adjusted rate: part of its 73% reflects who applies there rather than how each case is treated.' },
-  { id: 'FI', name: 'Finland',     observed: 0.67, observedInt: 0.58, adjAll: 0.53, adjInt: 0.49, m2: 9.58, m5: 3.89, grid: 11, aid: 1.0,
-    story: 'Finland decides mostly on international grounds. Its adjusted rate is lower than the reported one, but both routes stay usable.' },
-  { id: 'BG', name: 'Bulgaria',    observed: 0.94, observedInt: 0.94, adjAll: 0.48, adjInt: 0.51, m2: 3.22, m5: 2.96, grid: 11, aid: 0.7,
-    story: 'Bulgaria’s 94% mostly reflects that most of its applicants were Syrian. Adjusted for nationality it falls to 48%, and national humanitarian protection is almost never granted.' }
+{ id: 'IT', name: 'Italy',       observed: 0.58, observedInt: 0.32, adjAll: 0.68, adjInt: 0.49, m2: 10.16, m5: 1.86, grid: 11, aid: 1.0,
+story: 'Italy’s reported rate looks moderate because many of its applicants came from countries with low recognition odds. Adjusted for who applies, it was the most permissive of the larger countries, with national humanitarian protection doing much of the work.' },
+{ id: 'CH', name: 'Switzerland', observed: 0.70, observedInt: 0.40, adjAll: 0.57, adjInt: 0.28, m2: 5.51, m5: 0.40, grid: 11, aid: 1.6,
+story: 'Switzerland grants much of its protection through national status. On international grounds alone, its adjusted rate is low.' },
+{ id: 'MT', name: 'Malta',       observed: 0.73, observedInt: 0.63, adjAll: 0.57, adjInt: 0.48, m2: 5.26, m5: 1.96, grid: 9,  aid: 1.6,
+story: 'Malta’s reported rate is higher than its adjusted rate: part of its 73% reflects who applies there rather than how each case is treated.' },
+{ id: 'FI', name: 'Finland',     observed: 0.67, observedInt: 0.58, adjAll: 0.53, adjInt: 0.49, m2: 9.58, m5: 3.89, grid: 11, aid: 1.0,
+story: 'Finland decides mostly on international grounds. Its adjusted rate is lower than the reported one, but both routes stay usable.' },
+{ id: 'BG', name: 'Bulgaria',    observed: 0.94, observedInt: 0.94, adjAll: 0.48, adjInt: 0.51, m2: 3.22, m5: 2.96, grid: 11, aid: 0.7,
+story: 'Bulgaria’s 94% mostly reflects that most of its applicants were Syrian. Adjusted for nationality it falls to 48%, and national humanitarian protection is almost never granted.' }
 ];
 var NATIONALITIES = [
-  { id: 'SY', name: 'Syria',       orAll: 10.27, orInt: 9.91 },
-  { id: 'ER', name: 'Eritrea',     orAll: 3.80, orInt: 8.34 },
-  { id: 'IQ', name: 'Iraq',        orAll: 1.27, orInt: 1.73 },
-  { id: 'AF', name: 'Afghanistan', orAll: 1.00, orInt: 1.00 },
-  { id: 'IR', name: 'Iran',        orAll: 0.88, orInt: 1.46 },
-  { id: 'SO', name: 'Somalia',     orAll: 0.80, orInt: 1.16 },
-  { id: 'MM', name: 'Myanmar',     orAll: 0.23, orInt: 0.38 },
-  { id: 'NG', name: 'Nigeria',     orAll: 0.07, orInt: 0.11 },
-  { id: 'AL', name: 'Albania',     orAll: 0.05, orInt: 0.06 }
+{ id: 'SY', name: 'Syria',       orAll: 10.27, orInt: 9.91 },
+{ id: 'ER', name: 'Eritrea',     orAll: 3.80, orInt: 8.34 },
+{ id: 'IQ', name: 'Iraq',        orAll: 1.27, orInt: 1.73 },
+{ id: 'AF', name: 'Afghanistan', orAll: 1.00, orInt: 1.00 },
+{ id: 'IR', name: 'Iran',        orAll: 0.88, orInt: 1.46 },
+{ id: 'SO', name: 'Somalia',     orAll: 0.80, orInt: 1.16 },
+{ id: 'MM', name: 'Myanmar',     orAll: 0.23, orInt: 0.38 },
+{ id: 'NG', name: 'Nigeria',     orAll: 0.07, orInt: 0.11 },
+{ id: 'AL', name: 'Albania',     orAll: 0.05, orInt: 0.06 }
 ];
 function toP(odds) { return odds / (1 + odds); }
 function chances(nat, dest) {
-  /* Leerkes (2015), Appendix 1 step 5: odds = country coefficient × nationality odds ratio (same model).
-     Model 2: any positive decision. Model 5: international protection only. */
-  var pAll = toP(dest.m2 * nat.orAll), pInt = toP(dest.m5 * nat.orInt);
-  /* National route = protection on national grounds when international protection is not granted. */
-  return { all: pAll, int: pInt, nat: Math.max(0, (pAll - pInt) / (1 - pInt)) };
+var pAll = toP(dest.m2 * nat.orAll), pInt = toP(dest.m5 * nat.orInt);
+return { all: pAll, int: pInt, nat: Math.max(0, (pAll - pInt) / (1 - pInt)) };
 }
 function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
-function findIn(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return list[0]; }
-
 var EVENTS = {
-  check: { name: '[Checkpoint]', hint: 'costs 1–3 months', stamp: 'CHK', ink: '#8f2520', look: '',
-    apply: function (s, d) { var m = 1 + Math.random() * 1.5 * (1 + d); s.months += m; return 'Checkpoint: identity screening. +' + fmtM(m); } },
-  docs: { name: '[Documents]', hint: '+1 month now, cheaper steps after', stamp: 'DOC', ink: '#5c2a68', look: '',
-    apply: function (s) { s.months += 1; s.docs = Math.min(3, s.docs + 1); return 'Documents submitted. +1 mo now; the rest of the way costs less.'; } },
-  aid: { name: '[Legal support]', hint: 'saves 1.5 months', stamp: 'AID', ink: '#221e24', look: 'double',
-    apply: function (s) { var m = Math.min(s.months, 1.5); s.months -= m; return 'Legal support found. −' + fmtM(m); } },
-  setback: { name: '[Setback]', hint: 'sends you back, +3 months', stamp: 'RET', ink: '#8f2520', look: 'solid',
-    apply: function (s) {
-      s.months += 3;
-      var back = s.visited.length > 4 ? s.visited[s.visited.length - 4] : s.visited[0];
-      s.pos = { r: Math.floor(back / s.n), c: back % s.n };
-      s.visited = s.visited.slice(0, Math.max(1, s.visited.length - 3));
-      return 'Setback: case returned to an earlier stage. +3 months';
-    } }
+check: { name: '[Checkpoint]', hint: 'costs 1–3 months', stamp: 'CHK', ink: '#8f2520', style: '',
+apply: function (s, d) { var m = 1 + Math.random() * 1.5 * (1 + d); s.months += m; return 'Checkpoint: identity screening. +' + fmtM(m); } },
+docs: { name: '[Documents]', hint: '+1 month now, cheaper steps after', stamp: 'DOC', ink: '#5c2a68', style: '',
+apply: function (s) { s.months += 1; s.docs = Math.min(3, s.docs + 1); return 'Documents submitted. +1 mo now; the rest of the way costs less.'; } },
+aid: { name: '[Legal support]', hint: 'saves 1.5 months', stamp: 'AID', ink: '#221e24', style: 'double',
+apply: function (s) { var m = Math.min(s.months, 1.5); s.months -= m; return 'Legal support found. −' + fmtM(m); } },
+setback: { name: '[Setback]', hint: 'sends you back, +3 months', stamp: 'RET', ink: '#8f2520', style: 'solid',
+apply: function (s) {
+s.months += 3;
+var back = s.visited.length > 4 ? s.visited[s.visited.length - 4] : s.visited[0];
+s.pos = { r: Math.floor(back / s.n), c: back % s.n };
+s.visited = s.visited.slice(0, Math.max(1, s.visited.length - 3));
+return 'Setback: case returned to an earlier stage. +3 months';
+} }
 };
-var STEP_BASE = 0.25, STEP_DIFF = 1.3, BLOCK_COST = 0.5, DOC_RELIEF = 0.15;
-var DIRS = [[-1, 0], [0, 1], [1, 0], [0, -1]];
-var BIT = [1, 2, 4, 8];
-var OPP = [2, 3, 0, 1];
-var DIR_NAMES = ['north', 'east', 'south', 'west'];
+var STEP_BASE = 0.25, STEP_DIFF = 1.3;
+var BLOCK_COST = 0.5;
+var DOC_RELIEF = 0.15;
 var WALL = '#2b262d', WALL_PX = 3;
 var TILT = [-3, 2, -1, 3, -2, 1, -3, 2];
-var KEYS = { ArrowLeft: -1, KeyA: -1, ArrowUp: 0, KeyW: 0, ArrowRight: 1, KeyD: 1 };
-var KEY_FALLBACK = { ArrowLeft: -1, a: -1, A: -1, ArrowUp: 0, w: 0, W: 0, ArrowRight: 1, d: 1, D: 1 };
-
+var DIRS = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+var BIT = [1, 2, 4, 8], OPP = [2, 3, 0, 1];
+var DIR_NAMES = ['north', 'east', 'south', 'west'];
 function fmtM(m) { return m < 1 ? Math.round(m * 4) + ' wk' : m.toFixed(1) + ' mo'; }
 function pct(x) { return Math.round(x * 100) + '%'; }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
@@ -255,303 +66,352 @@ function nb(n, i, k) { var r = Math.floor(i / n) + DIRS[k][0], c = i % n + DIRS[
 function openWall(w, n, i, k) { var j = nb(n, i, k); if (j < 0) return; w[i] &= ~BIT[k]; w[j] &= ~BIT[OPP[k]]; }
 function closeWall(w, n, i, k) { var j = nb(n, i, k); if (j < 0) return; w[i] |= BIT[k]; w[j] |= BIT[OPP[k]]; }
 function canGo(w, n, i, k) { return nb(n, i, k) >= 0 && !(w[i] & BIT[k]); }
-function stampStyle(key, used, tilt, size) {
-  var e = EVENTS[key];
-  var base = 'display: inline-block; padding: 1px ' + (size > 12 ? 6 : 2) + 'px; font-weight: 700; font-size: ' + size + 'px; line-height: 1.15; white-space: nowrap; transform: rotate(' + TILT[tilt % TILT.length] + 'deg); ';
-  if (used) return base + 'border: 2px solid #77706a; color: #77706a; text-decoration: line-through';
-  if (e.look === 'solid') return base + 'border: 2px solid ' + e.ink + '; background: ' + e.ink + '; color: #f3ecda';
-  if (e.look === 'double') return base + 'border: 3px double ' + e.ink + '; color: ' + e.ink;
-  return base + 'border: 2px solid ' + e.ink + '; color: ' + e.ink;
-}
 function bfs(w, n, from) {
-  var dist = [], prev = [], q = [from], head = 0;
-  for (var i = 0; i < n * n; i++) { dist.push(-1); prev.push(-1); }
-  dist[from] = 0;
-  while (head < q.length) {
-    var x = q[head++];
-    for (var k = 0; k < 4; k++) {
-      if (!canGo(w, n, x, k)) continue;
-      var y = nb(n, x, k);
-      if (dist[y] < 0) { dist[y] = dist[x] + 1; prev[y] = x; q.push(y); }
-    }
-  }
-  return { dist: dist, prev: prev };
+var dist = [], prev = [], q = [from], head = 0;
+for (var i = 0; i < n * n; i++) { dist.push(-1); prev.push(-1); }
+dist[from] = 0;
+while (head < q.length) {
+var x = q[head++];
+for (var k = 0; k < 4; k++) {
+if (!canGo(w, n, x, k)) continue;
+var y = nb(n, x, k);
+if (dist[y] < 0) { dist[y] = dist[x] + 1; prev[y] = x; q.push(y); }
+}
+}
+return { dist: dist, prev: prev };
 }
 function pathTo(res, target) { var p = [], x = target; while (x >= 0) { p.unshift(x); x = res.prev[x]; } return p; }
 function carveTree(w, n, cells) {
-  var inSet = {}; cells.forEach(function (i) { inSet[i] = true; });
-  var seen = {}, start = cells[Math.floor(Math.random() * cells.length)], stack = [start];
-  seen[start] = true;
-  while (stack.length) {
-    var x = stack[stack.length - 1];
-    var opts = shuffle([0, 1, 2, 3]).filter(function (k) { var y = nb(n, x, k); return y >= 0 && inSet[y] && !seen[y]; });
-    if (!opts.length) { stack.pop(); continue; }
-    var y = nb(n, x, opts[0]);
-    openWall(w, n, x, opts[0]); seen[y] = true; stack.push(y);
-  }
+var inSet = {}; cells.forEach(function (i) { inSet[i] = true; });
+var seen = {}, start = cells[Math.floor(Math.random() * cells.length)], stack = [start];
+seen[start] = true;
+while (stack.length) {
+var x = stack[stack.length - 1];
+var opts = shuffle([0, 1, 2, 3]).filter(function (k) { var y = nb(n, x, k); return y >= 0 && inSet[y] && !seen[y]; });
+if (!opts.length) { stack.pop(); continue; }
+var y = nb(n, x, opts[0]);
+openWall(w, n, x, opts[0]); seen[y] = true; stack.push(y);
+}
 }
 function addLoops(w, n, cells, count) {
-  for (var t = 0; t < count * 4 && count > 0; t++) {
-    var i = cells[Math.floor(Math.random() * cells.length)], k = Math.floor(Math.random() * 4);
-    if (nb(n, i, k) >= 0 && (w[i] & BIT[k])) { openWall(w, n, i, k); count--; }
-  }
+for (var t = 0; t < count * 4 && count > 0; t++) {
+var i = cells[Math.floor(Math.random() * cells.length)], k = Math.floor(Math.random() * 4);
+if (nb(n, i, k) >= 0 && (w[i] & BIT[k])) { openWall(w, n, i, k); count--; }
+}
 }
 function generate(n, d) {
-  var w = [], all = [];
-  for (var i = 0; i < n * n; i++) { w.push(15); all.push(i); }
-  carveTree(w, n, all);
-  addLoops(w, n, all, Math.round(n * n * (0.02 + 0.10 * (1 - d))));
-  return w;
+var w = [], all = [];
+for (var i = 0; i < n * n; i++) { w.push(15); all.push(i); }
+carveTree(w, n, all);
+addLoops(w, n, all, Math.round(n * n * (0.02 + 0.10 * (1 - d))));
+return w;
 }
 function localD(s, i) {
-  var t = (i % s.n) / (s.n - 1);
-  t = t * t * (3 - 2 * t);
-  return ((1 - t) * s.dNat + t * s.dInt) * (1 - DOC_RELIEF * s.docs);
+var c = i % s.n, t = c / (s.n - 1);
+t = t * t * (3 - 2 * t);
+var d = (1 - t) * s.dNat + t * s.dInt;
+return d * (1 - DOC_RELIEF * s.docs);
 }
 function shiftOnce(s, d) {
-  var n = s.n, k = Math.min(n, d < 0.4 ? 3 : 4), h = s.heading, half = Math.floor(k / 2);
-  var side = Math.floor(Math.random() * 3) - 1, perp = (h + 1) % 4;
-  var cr = s.pos.r + DIRS[h][0] * (half + 1) + DIRS[perp][0] * side;
-  var cc = s.pos.c + DIRS[h][1] * (half + 1) + DIRS[perp][1] * side;
-  var r0 = Math.max(0, Math.min(n - k, cr - half)), c0 = Math.max(0, Math.min(n - k, cc - half));
-  var w = s.walls.slice(), cells = [], inSet = {};
-  for (var r = r0; r < r0 + k; r++) for (var c = c0; c < c0 + k; c++) { cells.push(r * n + c); inSet[r * n + c] = true; }
-  cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && inSet[j]) closeWall(w, n, i, q); } });
-  carveTree(w, n, cells);
-  if (Math.random() < 1 - d) addLoops(w, n, cells, 1);
-  if (Math.random() < 0.2 + 0.6 * d) {
-    var opened = [], closed = [];
-    cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && !inSet[j]) (w[i] & BIT[q] ? closed : opened).push([i, q]); } });
-    if (opened.length > 1 && closed.length) {
-      var trial = w.slice(), a = opened[Math.floor(Math.random() * opened.length)], b = closed[Math.floor(Math.random() * closed.length)];
-      closeWall(trial, n, a[0], a[1]); openWall(trial, n, b[0], b[1]);
-      if (bfs(trial, n, s.pos.r * n + s.pos.c).dist.every(function (x) { return x >= 0; })) w = trial;
-    }
-  }
-  return { walls: w, changed: cells };
+var n = s.n, k = Math.min(n, d < 0.4 ? 3 : 4), h = s.heading, half = Math.floor(k / 2);
+var side = Math.floor(Math.random() * 3) - 1, perp = (h + 1) % 4;
+var cr = s.pos.r + DIRS[h][0] * (half + 1) + DIRS[perp][0] * side;
+var cc = s.pos.c + DIRS[h][1] * (half + 1) + DIRS[perp][1] * side;
+var r0 = Math.max(0, Math.min(n - k, cr - half)), c0 = Math.max(0, Math.min(n - k, cc - half));
+var w = s.walls.slice(), cells = [], inSet = {};
+for (var r = r0; r < r0 + k; r++) for (var c = c0; c < c0 + k; c++) { cells.push(r * n + c); inSet[r * n + c] = true; }
+cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && inSet[j]) closeWall(w, n, i, q); } });
+carveTree(w, n, cells);
+if (Math.random() < 1 - d) addLoops(w, n, cells, 1);
+if (Math.random() < 0.2 + 0.6 * d) {
+var opened = [], closed = [];
+cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && !inSet[j]) (w[i] & BIT[q] ? closed : opened).push([i, q]); } });
+if (opened.length > 1 && closed.length) {
+var trial = w.slice(), a = opened[Math.floor(Math.random() * opened.length)], b = closed[Math.floor(Math.random() * closed.length)];
+closeWall(trial, n, a[0], a[1]); openWall(trial, n, b[0], b[1]);
+if (bfs(trial, n, s.pos.r * n + s.pos.c).dist.every(function (x) { return x >= 0; })) w = trial;
+}
+}
+return { walls: w, changed: cells };
 }
 function headingFor(s, dist) {
-  var mid = (s.n - 1) / 2;
-  if (s.pos.c < mid) return s.goalNat;
-  if (s.pos.c > mid) return s.goalInt;
-  return dist[s.goalInt] <= dist[s.goalNat] ? s.goalInt : s.goalNat;
+var mid = (s.n - 1) / 2;
+if (s.pos.c < mid) return s.goalNat;
+if (s.pos.c > mid) return s.goalInt;
+return dist[s.goalInt] <= dist[s.goalNat] ? s.goalInt : s.goalNat;
 }
 function shiftSection(s) {
-  var n = s.n, here = s.pos.r * n + s.pos.c, d = localD(s, here);
-  var dist0 = bfs(s.walls, n, here).dist, target = headingFor(s, dist0);
-  /* The harder the ground you are on, the more often the re-issue lengthens your way.
-     Once your way is already long, re-issues turn gentle so no route becomes endless. */
-  var longWay = dist0[target] >= 1.3 * n;
-  var hostile = !longWay && d > 0.6 && Math.random() < (d - 0.4);
-  var score = function (cand) { var len = bfs(cand.walls, n, here).dist[target]; return longWay ? -len : len; };
-  var dShift = longWay ? d * 0.3 : d;
-  var best = shiftOnce(s, dShift), bestScore = score(best), tries = longWay || hostile ? 2 : 0;
-  for (var t = 0; t < tries; t++) {
-    var cand = shiftOnce(s, dShift), sc = score(cand);
-    if (sc > bestScore) { best = cand; bestScore = sc; }
-  }
-  best.target = target; best.before = dist0;
-  return best;
+var n = s.n, here = s.pos.r * n + s.pos.c, d = localD(s, here);
+var dist0 = bfs(s.walls, n, here).dist, target = headingFor(s, dist0);
+var longWay = dist0[target] >= 1.3 * n;
+var hostile = !longWay && d > 0.6 && Math.random() < (d - 0.4);
+var score = function (cand) { var len = bfs(cand.walls, n, here).dist[target]; return longWay ? -len : len; };
+var dShift = longWay ? d * 0.3 : d;
+var best = shiftOnce(s, dShift), bestScore = score(best), tries = longWay || hostile ? 2 : 0;
+for (var t = 0; t < tries; t++) {
+var cand = shiftOnce(s, dShift), sc = score(cand);
+if (sc > bestScore) { best = cand; bestScore = sc; }
+}
+best.target = target; best.before = dist0;
+return best;
 }
 function placeLandmarks(s, dest) {
-  var n = s.n, w = s.walls, res = bfs(w, n, s.startI), marks = {}, scale = (n * n) / 121;
-  var used = {}; used[s.startI] = used[s.goalInt] = used[s.goalNat] = true;
-  var take = function (pool) { while (pool.length) { var c = pool.pop(); if (!used[c]) { used[c] = true; return c; } } return -1; };
-  [['nat', s.goalNat, s.dNat], ['int', s.goalInt, s.dInt]].forEach(function (side) {
-    var path = pathTo(res, side[1]), d = side[2], onPath = {};
-    path.forEach(function (i) { onPath[i] = true; });
-    var mine = function (i) { var c = i % n; return side[0] === 'nat' ? c < n / 2 : c >= n / 2; };
-    var route = shuffle(path.slice(2, -1).filter(mine)), dead = [], other = [];
-    for (var i = 0; i < n * n; i++) {
-      if (onPath[i] || used[i] || !mine(i)) continue;
-      var walls = 0; for (var k = 0; k < 4; k++) if (w[i] & BIT[k]) walls++;
-      (walls >= 3 ? dead : other).push(i);
-    }
-    shuffle(dead); shuffle(other);
-    var put = function (key, count, onRouteChance) {
-      for (var t = 0; t < Math.round(count * scale); t++) {
-        var cell = Math.random() < onRouteChance ? take(route) : -1;
-        if (cell < 0) cell = take(dead);
-        if (cell < 0) cell = take(other);
-        if (cell >= 0) marks[cell] = key;
-      }
-    };
-    put('check', 1 + 2.5 * d, 0.3 + 0.6 * d);
-    put('setback', 1.6 * d - 0.3, 0.5);
-    put('aid', (1.8 - 1.4 * d) * dest.aid, 0.7 - 0.6 * d);
-    put('docs', 1, 0);
-  });
-  return marks;
+var n = s.n, w = s.walls, res = bfs(w, n, s.startI), marks = {}, scale = (n * n) / 121;
+var used = {}; used[s.startI] = used[s.goalInt] = used[s.goalNat] = true;
+var take = function (pool) { while (pool.length) { var c = pool.pop(); if (!used[c]) { used[c] = true; return c; } } return -1; };
+[['nat', s.goalNat, s.dNat], ['int', s.goalInt, s.dInt]].forEach(function (side) {
+var path = pathTo(res, side[1]), d = side[2], onPath = {};
+path.forEach(function (i) { onPath[i] = true; });
+var mine = function (i) { var c = i % n; return side[0] === 'nat' ? c < n / 2 : c >= n / 2; };
+var route = shuffle(path.slice(2, -1).filter(mine)), dead = [], other = [];
+for (var i = 0; i < n * n; i++) {
+if (onPath[i] || used[i] || !mine(i)) continue;
+var walls = 0; for (var k = 0; k < 4; k++) if (w[i] & BIT[k]) walls++;
+(walls >= 3 ? dead : other).push(i);
 }
-
-class Component extends DCLogic {
-  constructor(props) {
-    super(props);
-    this.state = { phase: 'setup', natId: 'AF', destId: 'IT', now: Date.now(), months: 0, steps: 0 };
-  }
-  componentDidMount() {
-    var self = this;
-    this._timer = setInterval(function () { if (self.state.phase === 'play') self.setState({ now: Date.now() }); }, 500);
-  }
-  componentWillUnmount() { clearInterval(this._timer); }
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState && prevState.phase !== 'play' && this.state.phase === 'play') this.focusBoard();
-  }
-  focusBoard() { var el = this._play; if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } } }
-  handleKey(e) {
-    if (this.state.phase !== 'play' || e.altKey || e.ctrlKey || e.metaKey) return;
-    var turn = Object.prototype.hasOwnProperty.call(KEYS, e.code) ? KEYS[e.code]
-             : Object.prototype.hasOwnProperty.call(KEY_FALLBACK, e.key) ? KEY_FALLBACK[e.key] : null;
-    if (turn === null) return;
-    e.preventDefault();
-    if (e.repeat) return;
-    this.move(turn);
-  }
-  start() {
-    var nat = findIn(NATIONALITIES, this.state.natId), dest = findIn(DESTINATIONS, this.state.destId), ch = chances(nat, dest);
-    var n = dest.grid, startI = (n - 1) * n + Math.floor(n / 2), t = Date.now();
-    var s = { n: n, dAll: 1 - ch.all, dInt: clamp(1 - ch.int, 0.03, 0.95), dNat: clamp(1 - ch.nat, 0.03, 0.95), ch: ch,
-      startI: startI, goalInt: n - 1, goalNat: 0, pos: { r: n - 1, c: Math.floor(n / 2) }, heading: 0, docs: 0 };
-    s.walls = generate(n, s.dAll);
-    s.marks = placeLandmarks(s, dest);
-    this.setState(Object.assign(s, { phase: 'play', startTs: t, now: t, endTs: null, exit: null,
-      changed: [], used: {}, visited: [startI], months: 0, steps: 0, blocked: 0, met: 0, shifts: 0, lengthened: 0,
-      log: [{ text: '(0) Application lodged. Reach INT (top right) or NAT (top left).' }] }));
-  }
-  move(turn) {
-    var st = this.state;
-    if (st.phase !== 'play') return;
-    var n = st.n;
-    var s = { n: n, dInt: st.dInt, dNat: st.dNat, goalInt: st.goalInt, goalNat: st.goalNat, docs: st.docs,
-      ch: st.ch,
-      pos: st.pos, heading: st.heading, walls: st.walls, visited: st.visited.slice(),
-      months: st.months, steps: st.steps, blocked: st.blocked, met: st.met, shifts: st.shifts, lengthened: st.lengthened,
-      used: Object.assign({}, st.used), log: st.log.slice(0, 5) };
-    var h = (st.heading + turn + 4) % 4, here = s.pos.r * n + s.pos.c, t = Date.now();
-    if (!canGo(st.walls, n, here, h)) {
-      s.months += BLOCK_COST; s.blocked++; s.heading = h;
-      s.log.unshift({ text: '(' + s.steps + ') Wall to the ' + DIR_NAMES[h] + '. Applicant turned. +2 wk' });
-      this.setState(Object.assign(s, { changed: [], now: t })); return;
-    }
-    var i = nb(n, here, h);
-    s.pos = { r: Math.floor(i / n), c: i % n }; s.heading = h; s.steps++;
-    var ld = localD(s, i);
-    s.months += STEP_BASE + STEP_DIFF * ld * ld;
-    s.visited.push(i);
-    var ev = st.marks[i];
-    if (ev && !s.used[i]) { s.used[i] = true; s.met++; s.log.unshift({ text: '(' + s.steps + ') ' + EVENTS[ev].apply(s, ld) }); }
-    if (i === s.goalInt || i === s.goalNat) {
-      this.setState(Object.assign(s, { phase: 'end', exit: i === s.goalInt ? 'int' : 'nat', endTs: t, now: t, changed: [] })); return;
-    }
-    var nowI = s.pos.r * n + s.pos.c, sh = shiftSection(s), before = sh.before;
-    s.walls = sh.walls; s.changed = sh.changed; s.shifts++;
-    var after = bfs(s.walls, n, nowI).dist;
-    if (after[sh.target] > before[sh.target]) s.lengthened++;
-    this.setState(Object.assign(s, { now: t }));
-  }
-
-  renderVals() {
-    var self = this, st = this.state;
-    var natId = st.natId, destId = st.destId;
-    var nat = findIn(NATIONALITIES, natId), dest = findIn(DESTINATIONS, destId);
-    var chip = function (sel) {
-      return 'min-height: 48px; padding: 10px 14px; text-align: left; font-size: 16px; cursor: pointer; white-space: pre; ' +
-        (sel ? 'border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda;' : 'border: 2px solid #2b262d; background: transparent; color: #2b262d;');
-    };
-    var elapsed = st.startTs ? Math.max(0, Math.floor(((st.endTs || st.now) - st.startTs) / 1000)) : 0;
-    var clock = pad(Math.floor(elapsed / 60)) + ':' + pad(elapsed % 60);
-    var months = st.phase === 'setup' ? 0 : (st.months || 0);
-    var ml = months >= 12 ? Math.floor(months / 12) + ' yr ' + Math.floor(months % 12) + ' mo' : months.toFixed(1) + ' mo';
-    var yrs = Math.floor(months / 12), rest = Math.floor(months % 12), tally = [];
-    while (rest > 0) { var k = Math.min(5, rest); tally.push({ bars: k === 5 ? '||||' : new Array(k + 1).join('|'), full: k === 5 }); rest -= k; }
-
-    var cells = [], n = st.n || dest.grid, routeInt = 0, routeNat = 0;
-    if (st.phase === 'play') {
-      var vis = {}, chg = {};
-      st.visited.forEach(function (i) { vis[i] = true; });
-      st.changed.forEach(function (i) { chg[i] = true; });
-      var here = st.pos.r * n + st.pos.c, res = bfs(st.walls, n, here);
-      routeInt = res.dist[st.goalInt]; routeNat = res.dist[st.goalNat];
-      var fs = n <= 11 ? 12 : 10;
-      for (var i = 0; i < n * n; i++) {
-        var r = Math.floor(i / n), c = i % n, w = st.walls[i];
-        var isP = i === here, isGI = i === st.goalInt, isGN = i === st.goalNat;
-        var mk = !isP && !isGI && !isGN ? st.marks[i] : null, used = mk && st.used[i];
-        var sh = [];
-        if ((w & 1) && !isGI && !isGN) sh.push('inset 0 ' + WALL_PX + 'px 0 0 ' + WALL);
-        if (w & 8) sh.push('inset ' + WALL_PX + 'px 0 0 0 ' + WALL);
-        if (c === n - 1 && (w & 2)) sh.push('inset -' + WALL_PX + 'px 0 0 0 ' + WALL);
-        if (r === n - 1 && (w & 4) && i !== st.startI) sh.push('inset 0 -' + WALL_PX + 'px 0 0 ' + WALL);
-        var bg = chg[i] ? 'rgba(180,160,140,0.32)' : vis[i] ? 'rgba(92,42,104,0.06)' : 'transparent';
-        cells.push({
-          wallStyle: 'transition: background-color 0.35s ease; background: ' + bg + '; box-shadow: ' + (sh.length ? sh.join(', ') : 'none'),
-          isPlayer: isP, isGoalInt: isGI, isGoalNat: isGN, isTrail: vis[i] && !isP && !isGI && !isGN && !mk,
-          hasMark: !!mk, markText: mk ? EVENTS[mk].stamp : '', markStyle: mk ? stampStyle(mk, used, i, fs) : '',
-          arrowStyle: 'transform: rotate(' + (st.heading * 90) + 'deg); transition: transform 0.2s ease',
-          label: isP ? 'You, facing ' + DIR_NAMES[st.heading] : isGI ? 'Exit: international protection' : isGN ? 'Exit: national humanitarian protection' : mk ? EVENTS[mk].name + (used ? ' (used)' : '') : vis[i] ? 'Your path' : 'Corridor'
-        });
-      }
-    }
-    var log = (st.log || []).slice(0, 3).map(function (e, k) {
-      return { text: e.text, style: 'font-size: 16px; line-height: 1.45; ' + (k === 0 ? 'color: #221e24; font-weight: 700' : 'color: #3f3b3e') };
-    });
-    var legend = Object.keys(EVENTS).map(function (k, idx) {
-      var e = EVENTS[k];
-      return { stamp: e.stamp, name: e.name, hint: e.hint, stampStyle: stampStyle(k, false, idx, 13) };
-    });
-
-    var isEnd = st.phase === 'end', ch = st.ch || chances(nat, dest), isInt = st.exit === 'int';
-    var bigV = 'font-family: \'Old Standard TT\', serif; font-size: 32px; font-weight: 700; line-height: 1.1';
-    var easier = ch.int >= ch.nat ? 'international' : 'national';
-    return {
-      isSetup: st.phase === 'setup', isPlay: st.phase === 'play', isEnd: isEnd,
-      showTime: st.phase !== 'setup',
-      showIntro: st.phase !== 'play', titleSize: st.phase === 'play' ? '30px' : '46px', stackGap: st.phase === 'play' ? '14px' : '24px',
-      clock: clock, monthsLabel: months >= 12 ? ml : months.toFixed(1) + ' months',
-      hasYears: yrs > 0, yearsLabel: yrs + (yrs === 1 ? ' yr' : ' yrs') + (months % 12 >= 1 ? ' +' : ''), tally: tally,
-      hudStamp: isEnd ? 'ADJUSTED RECOGNITION RATE ' + pct(dest.adjAll) : 'REPORTED RECOGNITION RATE ' + pct(dest.observed),
-      reportedPct: pct(dest.observed),
-      natItems: NATIONALITIES.map(function (x) {
-        var sel = x.id === natId;
-        return { name: x.name, box: sel ? '☒' : '☐', pressed: sel ? 'true' : 'false', style: chip(sel), pick: function () { self.setState({ natId: x.id }); } };
-      }),
-      destItems: DESTINATIONS.map(function (x) {
-        var sel = x.id === destId;
-        return { name: x.name, box: sel ? '☒' : '☐', pressed: sel ? 'true' : 'false', style: chip(sel), pick: function () { self.setState({ destId: x.id }); } };
-      }),
-      start: function () { self.start(); },
-      restart: function () { self.setState({ phase: 'setup', months: 0, steps: 0, startTs: null, endTs: null }); },
-      playRef: function (el) { self._play = el; },
-      onKey: function (e) { self.handleKey(e); },
-      grabFocus: function (e) { if (!(e.target && e.target.closest && e.target.closest('button'))) self.focusBoard(); },
-      goLeft: function () { self.move(-1); },
-      goStraight: function () { self.move(0); },
-      goRight: function () { self.move(1); },
-      natName: nat.name, destName: dest.name,
-      steps: st.steps || 0, routeInt: routeInt, routeNat: routeNat,
-      gridCols: 'repeat(' + n + ', minmax(0, 1fr))',
-      cells: cells, log: log, legend: legend,
-      outcomeTitle: isInt ? 'INTERNATIONAL PROTECTION' : 'NATIONAL PROTECTION',
-      endStampStyle: 'display: inline-block; align-self: flex-start; margin: 0; border: 4px solid ' + (isInt ? '#5c2a68' : '#8f2520') + '; color: ' + (isInt ? '#5c2a68' : '#8f2520') + '; padding: 8px 18px; font-family: \'Special Elite\', monospace; font-weight: 400; font-size: 28px; letter-spacing: 0.12em; transform: rotate(-4deg); white-space: nowrap',
-      outcomeLead: 'As an applicant from ' + nat.name + ' in ' + dest.name + ', your case took ' + ml + '.',
-      outcomeText: 'You left through the ' + (isInt ? 'international protection (Geneva Convention / ECHR)' : 'national humanitarian protection') + ' exit.',
-      reveal: [
-        { k: 'REPORTED RATE', v: pct(dest.observed), s: 'What you were told about ' + dest.name + ' before applying.', vStyle: bigV + '; text-decoration: line-through; text-decoration-thickness: 2px; color: #3f3b3e' },
-        { k: 'ADJUSTED RATE', v: pct(dest.adjAll), s: dest.name + ' once the mix of applicants is taken into account.', vStyle: bigV },
-        { k: 'YOUR ODDS', v: pct(ch.all), s: 'For someone from ' + nat.name + ' (international ' + pct(ch.int) + ', national ' + pct(ch.nat * (1 - ch.int)) + ').', vStyle: bigV }
-      ],
-      explain: dest.story + ' For ' + nat.name + ', the ' + easier + ' route was the easier way through' + (ch.nat < 0.03 ? ', and the national exit was all but closed.' : '.'),
-      summary: [
-        { label: 'Time in procedure', value: ml },
-        { label: 'Time on file', value: clock },
-        { label: 'Steps taken', value: String(st.steps || 0) },
-        { label: 'Walls hit', value: String(st.blocked || 0) },
-        { label: 'Times your route got longer', value: String(st.lengthened || 0) },
-        { label: 'Stamps received', value: String(st.met || 0) }
-      ]
-    };
-  }
+shuffle(dead); shuffle(other);
+var put = function (key, count, onRouteChance) {
+for (var t = 0; t < Math.round(count * scale); t++) {
+var cell = Math.random() < onRouteChance ? take(route) : -1;
+if (cell < 0) cell = take(dead);
+if (cell < 0) cell = take(other);
+if (cell >= 0) marks[cell] = key;
 }
-</script>
-</body>
-</html>
+};
+put('check', 1 + 2.5 * d, 0.3 + 0.6 * d);
+put('setback', 1.6 * d - 0.3, 0.5);
+put('aid', (1.8 - 1.4 * d) * dest.aid, 0.7 - 0.6 * d);
+put('docs', 1, 0);
+});
+return marks;
+}
+var $ = function (id) { return document.getElementById(id); };
+var S = { phase: 'setup', natId: 'AF', destId: 'IT' };
+var cellEls = [], wallEls = [];
+function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return list[0]; }
+function monthsLabel(m) { return m >= 12 ? Math.floor(m / 12) + ' yr ' + Math.floor(m % 12) + ' mo' : m.toFixed(1) + ' mo'; }
+function elapsedLabel() {
+if (!S.startTs) return '00:00';
+var e = Math.max(0, Math.floor(((S.endTs || Date.now()) - S.startTs) / 1000));
+return pad(Math.floor(e / 60)) + ':' + pad(e % 60);
+}
+function stampHTML(key, used, tiltIdx) {
+var e = EVENTS[key];
+var cls = 'mk' + (e.style ? ' ' + e.style : '') + (used ? ' used' : '');
+return '<span class="' + cls + '" style="color:' + e.ink + ';transform:rotate(' + TILT[tiltIdx % TILT.length] + 'deg)">' + e.stamp + '</span>';
+}
+function renderTally(m) {
+var el = $('tally'), html = '', yrs = Math.floor(m / 12), rest = Math.floor(m % 12);
+if (yrs > 0) html += '<span class="yrs">' + yrs + (yrs === 1 ? ' yr' : ' yrs') + (rest ? ' +' : '') + '</span>';
+while (rest > 0) { var k = Math.min(5, rest); html += '<span class="tg' + (k === 5 ? ' full' : '') + '">' + (k === 5 ? '||||' : new Array(k + 1).join('|')) + '</span>'; rest -= k; }
+if (!html) html = '<span class="tg" style="opacity:.35">—</span>';
+el.innerHTML = html;
+$('months').textContent = (m >= 12 ? monthsLabel(m) : m.toFixed(1) + ' months');
+}
+function setPhase(p) {
+S.phase = p;
+document.body.className = 'is-' + p;
+window.scrollTo(0, 0);
+$('setup').hidden = p !== 'setup';
+$('play').hidden = p !== 'play';
+$('end').hidden = p !== 'end';
+}
+function buildChips(container, list, key) {
+var existing = container.children.length === list.length ? Array.prototype.slice.call(container.children) : null;
+if (!existing) container.innerHTML = '';
+list.forEach(function (item, idx) {
+var b = existing ? existing[idx] : document.createElement('button');
+b.type = 'button'; b.className = 'chip'; b.textContent = item.name;
+b.setAttribute('aria-pressed', String(S[key] === item.id));
+b.addEventListener('click', function () {
+S[key] = item.id;
+Array.prototype.forEach.call(container.children, function (c, i) { c.setAttribute('aria-pressed', String(list[i].id === item.id)); });
+renderSetup();
+});
+if (!existing) container.appendChild(b);
+});
+}
+function renderSetup() {
+var dest = find(DESTINATIONS, S.destId);
+$('rate-country').textContent = dest.name;
+$('rate').textContent = pct(dest.observed);
+$('hud-stamp').textContent = 'REPORTED RECOGNITION RATE ' + pct(dest.observed);
+renderTally(0);
+$('clock').textContent = '00:00';
+}
+function buildLegend() {
+var el = $('legend'); el.innerHTML = '';
+var add = function (html, text) { var row = document.createElement('div'), t = document.createElement('span'); row.innerHTML = html; t.textContent = text; row.appendChild(t); el.appendChild(row); };
+add('<span class="goal" aria-hidden="true">INT</span>', 'International protection (Geneva / ECHR)');
+add('<span class="goal nat" aria-hidden="true">NAT</span>', 'National humanitarian protection');
+Object.keys(EVENTS).forEach(function (k, idx) { add(stampHTML(k, false, idx), EVENTS[k].name + ' ' + EVENTS[k].hint); });
+add('<span class="swatch" aria-hidden="true"></span>', 'Section just re-issued');
+}
+function note(msg) { S.log.unshift('(' + S.steps + ') ' + msg); S.log = S.log.slice(0, 6); }
+function start() {
+var nat = find(NATIONALITIES, S.natId), dest = find(DESTINATIONS, S.destId), ch = chances(nat, dest);
+var n = dest.grid, startI = (n - 1) * n + Math.floor(n / 2);
+Object.assign(S, {
+startTs: Date.now(), endTs: null, exit: null, ch: ch,
+n: n, dAll: 1 - ch.all, dInt: clamp(1 - ch.int, 0.03, 0.95), dNat: clamp(1 - ch.nat, 0.03, 0.95),
+startI: startI, goalInt: n - 1, goalNat: 0,
+pos: { r: n - 1, c: Math.floor(n / 2) }, heading: 0,
+changed: [], used: {}, docs: 0,
+visited: [startI], months: 0, steps: 0, blocked: 0, met: 0, shifts: 0, lengthened: 0,
+log: ['(0) Application lodged. Reach INT (top right) or NAT (top left).']
+});
+S.walls = generate(n, S.dAll);
+S.marks = placeLandmarks(S, dest);
+var maze = $('maze'), wl = $('walls');
+maze.innerHTML = ''; wl.innerHTML = ''; cellEls = []; wallEls = [];
+maze.style.gridTemplateColumns = wl.style.gridTemplateColumns = 'repeat(' + n + ', minmax(0, 1fr))';
+for (var i = 0; i < n * n; i++) {
+var c = document.createElement('div'); c.className = 'cell'; c.setAttribute('role', 'gridcell');
+maze.appendChild(c); cellEls.push(c);
+var w = document.createElement('div'); w.className = 'wcell';
+wl.appendChild(w); wallEls.push(w);
+}
+$('who-nat').textContent = nat.name;
+$('who-dest').textContent = dest.name;
+$('hud-stamp').textContent = 'REPORTED RECOGNITION RATE ' + pct(dest.observed);
+setPhase('play');
+render();
+try { $('frame').focus({ preventScroll: true }); } catch (e) { $('frame').focus(); }
+}
+function render() {
+var n = S.n, vis = {}, chg = {};
+S.visited.forEach(function (i) { vis[i] = true; });
+S.changed.forEach(function (i) { chg[i] = true; });
+var here = S.pos.r * n + S.pos.c;
+for (var i = 0; i < n * n; i++) {
+var r = Math.floor(i / n), c = i % n, w = S.walls[i], el = cellEls[i];
+var isP = i === here, isGI = i === S.goalInt, isGN = i === S.goalNat;
+var mk = !isP && !isGI && !isGN ? S.marks[i] : null, used = mk && S.used[i];
+var sh = [];
+if ((w & 1) && !isGI && !isGN) sh.push('inset 0 ' + WALL_PX + 'px 0 0 ' + WALL);
+if (w & 8) sh.push('inset ' + WALL_PX + 'px 0 0 0 ' + WALL);
+if (c === n - 1 && (w & 2)) sh.push('inset -' + WALL_PX + 'px 0 0 0 ' + WALL);
+if (r === n - 1 && (w & 4) && i !== S.startI) sh.push('inset 0 -' + WALL_PX + 'px 0 0 ' + WALL);
+wallEls[i].style.boxShadow = sh.length ? sh.join(', ') : 'none';
+wallEls[i].style.backgroundColor = chg[i] ? 'rgba(180,160,140,0.32)' : vis[i] ? 'rgba(92,42,104,0.06)' : 'transparent';
+var html = '', label;
+if (isP) {
+html = '<span class="tok"><svg viewBox="0 0 24 24" aria-hidden="true" style="transform:rotate(' + (S.heading * 90) + 'deg)"><path d="M12 3 L20 20 L12 15.5 L4 20 Z" fill="#f3ecda"/></svg></span>';
+label = 'You, facing ' + DIR_NAMES[S.heading];
+} else if (isGI) { html = '<span class="goal">INT</span>'; label = 'Exit: international protection'; }
+else if (isGN) { html = '<span class="goal nat">NAT</span>'; label = 'Exit: national humanitarian protection'; }
+else if (mk) { html = stampHTML(mk, used, i); label = EVENTS[mk].name + (used ? ' (used)' : ''); }
+else if (vis[i]) { html = '<span class="trail" aria-hidden="true">×</span>'; label = 'Your path'; }
+else label = 'Corridor';
+if (el._html !== html) { el.innerHTML = html; el._html = html; }
+el.setAttribute('aria-label', label);
+}
+var res = bfs(S.walls, n, here);
+$('steps').textContent = S.steps;
+$('route-int').textContent = res.dist[S.goalInt];
+$('route-nat').textContent = res.dist[S.goalNat];
+renderTally(S.months);
+var log = $('log'); log.innerHTML = '';
+S.log.slice(0, 3).forEach(function (t) { var li = document.createElement('li'); li.textContent = t; log.appendChild(li); });
+}
+function move(turn) {
+if (S.phase !== 'play') return;
+var n = S.n, h = (S.heading + turn + 4) % 4, here = S.pos.r * n + S.pos.c;
+if (!canGo(S.walls, n, here, h)) {
+S.months += BLOCK_COST; S.blocked++; S.heading = h; S.changed = [];
+note('Wall to the ' + DIR_NAMES[h] + '. Applicant turned. +2 wk');
+return render();
+}
+var i = nb(n, here, h);
+S.pos = { r: Math.floor(i / n), c: i % n }; S.heading = h; S.steps++;
+var ld = localD(S, i);
+S.months += STEP_BASE + STEP_DIFF * ld * ld;
+S.visited.push(i);
+var ev = S.marks[i];
+if (ev && !S.used[i]) { S.used[i] = true; S.met++; note(EVENTS[ev].apply(S, localD(S, i))); }
+if (i === S.goalInt) return finish('int');
+if (i === S.goalNat) return finish('nat');
+var nowI = S.pos.r * n + S.pos.c, sh = shiftSection(S), before = sh.before;
+S.walls = sh.walls; S.changed = sh.changed; S.shifts++;
+var after = bfs(S.walls, n, nowI).dist;
+if (after[sh.target] > before[sh.target]) S.lengthened++;
+render();
+}
+function revealCard(cls, k, v, s) {
+var d = document.createElement('div'); d.className = cls || '';
+d.innerHTML = '<span class="k"></span><span class="v"></span><span class="s"></span>';
+d.children[0].textContent = k; d.children[1].textContent = v; d.children[2].textContent = s;
+return d;
+}
+function finish(exit) {
+S.exit = exit; S.endTs = Date.now();
+var nat = find(NATIONALITIES, S.natId), dest = find(DESTINATIONS, S.destId), ml = monthsLabel(S.months), ch = S.ch;
+var title = $('end-title');
+title.textContent = exit === 'int' ? 'INTERNATIONAL PROTECTION' : 'NATIONAL PROTECTION';
+title.className = 'stamp end-stamp' + (exit === 'int' ? ' violet' : '');
+$('end-text').innerHTML = '';
+var p1 = document.createElement('span'); p1.className = 'route-line';
+p1.textContent = 'As an applicant from ' + nat.name + ' in ' + dest.name + ', your case took ' + ml + '.';
+$('end-text').appendChild(p1);
+$('end-text').appendChild(document.createTextNode(' You left through the ' + (exit === 'int' ? 'international protection (Geneva Convention / ECHR)' : 'national humanitarian protection') + ' exit.'));
+var rv = $('reveal'); rv.innerHTML = '';
+rv.appendChild(revealCard('before', 'REPORTED RATE', pct(dest.observed), 'What you were told about ' + dest.name + ' before applying.'));
+rv.appendChild(revealCard('', 'ADJUSTED RATE', pct(dest.adjAll), dest.name + ' once the mix of applicants is taken into account.'));
+rv.appendChild(revealCard('', 'YOUR ODDS', pct(ch.all), 'For someone from ' + nat.name + ' (international ' + pct(ch.int) + ', national ' + pct(ch.nat * (1 - ch.int)) + ').'));
+var easier = ch.int >= ch.nat ? 'international' : 'national';
+$('end-explain').textContent = dest.story + ' For ' + nat.name + ', the ' + easier + ' route was the easier way through' +
+(ch.nat < 0.03 ? ', and the national exit was all but closed.' : '.');
+var rows = [
+['Time in procedure', ml], ['Time on file', elapsedLabel()], ['Steps taken', S.steps], ['Walls hit', S.blocked],
+['Times your route got longer', S.lengthened], ['Stamps received', S.met]
+];
+var sum = $('summary'); sum.innerHTML = '';
+rows.forEach(function (r) {
+var d = document.createElement('div'), k = document.createElement('span'), dots = document.createElement('span'), v = document.createElement('span');
+k.textContent = r[0]; dots.className = 'dots'; v.className = 'v'; v.textContent = String(r[1]);
+d.appendChild(k); d.appendChild(dots); d.appendChild(v); sum.appendChild(d);
+});
+renderTally(S.months);
+$('clock').textContent = elapsedLabel();
+$('hud-stamp').textContent = 'ADJUSTED RECOGNITION RATE ' + pct(dest.adjAll);
+setPhase('end');
+title.focus();
+}
+function backToSetup() { S.startTs = null; S.endTs = null; setPhase('setup'); renderSetup(); }
+var BTN = { '-1': $('btn-left'), '0': $('btn-straight'), '1': $('btn-right') };
+function flash(turn) {
+var b = BTN[String(turn)]; if (!b) return;
+b.classList.add('active');
+clearTimeout(b._t); b._t = setTimeout(function () { b.classList.remove('active'); }, 140);
+}
+$('btn-left').addEventListener('click', function () { move(-1); });
+$('btn-straight').addEventListener('click', function () { move(0); });
+$('btn-right').addEventListener('click', function () { move(1); });
+$('start').addEventListener('click', start);
+$('again').addEventListener('click', start);
+$('restart').addEventListener('click', backToSetup);
+$('change').addEventListener('click', backToSetup);
+var KEYS = { ArrowLeft: -1, KeyA: -1, ArrowUp: 0, KeyW: 0, ArrowRight: 1, KeyD: 1 };
+var KEY_FALLBACK = { ArrowLeft: -1, Left: -1, a: -1, A: -1, ArrowUp: 0, Up: 0, w: 0, W: 0, ArrowRight: 1, Right: 1, d: 1, D: 1 };
+function onKey(e) {
+if (S.phase !== 'play' || e.altKey || e.ctrlKey || e.metaKey) return;
+var t = e.target;
+if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+var turn = Object.prototype.hasOwnProperty.call(KEYS, e.code) ? KEYS[e.code]
+: Object.prototype.hasOwnProperty.call(KEY_FALLBACK, e.key) ? KEY_FALLBACK[e.key] : null;
+if (turn === null) return;
+e.preventDefault();
+if (e.repeat) return;
+flash(turn);
+move(turn);
+}
+window.addEventListener('keydown', onKey);
+$('play').addEventListener('pointerdown', function (e) {
+if (!e.target.closest('button')) { try { $('frame').focus({ preventScroll: true }); } catch (x) { $('frame').focus(); } }
+});
+setInterval(function () { if (S.phase === 'play') $('clock').textContent = elapsedLabel(); }, 250);
+buildChips($('nat-list'), NATIONALITIES, 'natId');
+buildChips($('dest-list'), DESTINATIONS, 'destId');
+buildLegend();
+renderSetup();
+})();</script> </body></html>
