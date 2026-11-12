@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Asylum Maze</title>
+<script src="./vendor/react.js"></script>
+<script src="./vendor/react-dom.js"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&amp;family=Courier+Prime:wght@400;700&amp;family=Old+Standard+TT:wght@400;700&amp;display=swap">
+<style>
+body{margin:0;background:#ebe2cb}
+a{color:#5c2a68}a:hover{color:#2b262d}
+button{font-family:inherit}
+button:focus-visible{outline:3px solid #5c2a68;outline-offset:3px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; position: relative; background: #ebe2cb; color: #221e24; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 16px; line-height: 1.5; padding: 28px 16px 56px">
+<svg width="0" height="0" aria-hidden="true" style="position: absolute"><filter id="inkbleedMain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="4" result="noise"></feTurbulence><feDisplacementMap in="SourceGraphic" in2="noise" scale="1.2"></feDisplacementMap></filter></svg>
+<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(90deg, rgba(43,38,45,0.025) 0 3px, transparent 3px 41px), radial-gradient(ellipse at 18% 26%, rgba(120,100,70,0.08), transparent 45%), radial-gradient(ellipse at 86% 78%, rgba(120,100,70,0.10), transparent 40%)"></div>
+<div style="position: relative; max-width: 1180px; margin: 0 auto; min-height: calc(100vh - 56px); display: flex; flex-direction: column; gap: {{stackGap}}">
+
+<header style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; border-bottom: 2px solid #2b262d; padding-bottom: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-family: 'Old Standard TT', Georgia, serif; font-size: {{titleSize}}; line-height: 1; font-weight: 700">Asylum Maze</h1>
+<sc-if value="{{showIntro}}" hint-placeholder-val="{{ true }}"><p style="margin: 0; font-size: 17px">Every decision reshapes the path ahead. The odds depend on where you come from and where you ask.</p></sc-if>
+</div>
+<div role="group" aria-label="Game status" style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start">
+<sc-if value="{{showTime}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.12em">TIME ON FILE</span>
+<span role="timer" style="font-size: 34px; line-height: 1; font-weight: 700; font-variant-numeric: tabular-nums">{{clock}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.12em">IN PROCEDURE</span>
+<div aria-hidden="true" style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; min-height: 34px; max-width: 260px">
+<sc-if value="{{hasYears}}" hint-placeholder-val="{{ false }}"><span style="font-size: 20px; font-weight: 700">{{yearsLabel}}</span></sc-if>
+<sc-for list="{{tally}}" as="g" hint-placeholder-count="2">
+<span style="position: relative; font-family: 'Old Standard TT', serif; font-size: 30px; line-height: 1; letter-spacing: 1px">{{g.bars}}<sc-if value="{{g.full}}" hint-placeholder-val="{{ false }}"><span style="position: absolute; left: -3px; right: -3px; top: 50%; height: 2px; background: #2b262d; transform: rotate(-24deg)"></span></sc-if></span>
+</sc-for>
+</div>
+<span style="font-size: 15px; font-weight: 700">{{monthsLabel}}</span>
+</div>
+</sc-if>
+<span style="display: inline-block; border: 3px solid #5c2a68; color: #5c2a68; padding: 5px 10px; font-family: 'Special Elite', monospace; font-size: 17px; letter-spacing: 0.12em; transform: rotate(-4deg); max-width: 100%; box-sizing: border-box">{{hudStamp}}</span>
+</div>
+</header>
+
+<sc-if value="{{isSetup}}" hint-placeholder-val="{{ true }}">
+<section style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 26px; padding-bottom: 16px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 1. NATIONALITY OF APPLICANT (tick one)</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px">
+<sc-for list="{{natItems}}" as="item" hint-placeholder-count="8">
+<button type="button" onClick="{{item.pick}}" aria-pressed="{{item.pressed}}" style="{{item.style}}">{{item.box}}  {{item.name}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 2. COUNTRY OF APPLICATION (tick one)</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px">
+<sc-for list="{{destItems}}" as="item" hint-placeholder-count="5">
+<button type="button" onClick="{{item.pick}}" aria-pressed="{{item.pressed}}" style="{{item.style}}">{{item.box}}  {{item.name}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 3. HOW IT WORKS</h2>
+<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px 24px; font-size: 16px; line-height: 1.45">
+<li>— Two exits: INT (international protection, top right) and NAT (national humanitarian protection, top left). Both are open. Reach either one.</li>
+<li>— How hard each exit is to reach depends on your nationality and the country you chose. The harder way costs more months.</li>
+<li>— Every step re-issues a section of the maze ahead of you (the washed patch). Walls cost two weeks.</li>
+<li>— CHK costs time. DOC costs a month now but makes the rest of the way cheaper. AID saves time. RET sends you back.</li>
+<li>— Play with the arrow keys (← ↑ →) or A, W, D — or the buttons.</li>
+</ul>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; border-top: 2px solid #2b262d; padding-top: 16px">
+<p style="margin: 0; font-size: 16px">Reported recognition rate in <strong>{{destName}}</strong>: <strong>{{reportedPct}}</strong> <span style="color: #3f3b3e">(first-instance decisions, 2014)</span></p>
+<button type="button" onClick="{{start}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; cursor: pointer">Submit application</button>
+</div>
+</section>
+</sc-if>
+
+<sc-if value="{{isPlay}}" hint-placeholder-val="{{ false }}">
+<section ref="{{playRef}}" tabIndex="0" onKeyDown="{{onKey}}" onPointerDown="{{grabFocus}}" aria-label="Maze game. Use the arrow keys or A, W and D." style="flex: 1; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; justify-content: center; outline: none">
+<div style="flex: 0 1 auto; width: max(300px, min(calc(100vh - 200px), calc(100vw - 470px), 780px)); max-width: 100%; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 15px">
+<span>{{natName}} → {{destName}}</span>
+<span>Step {{steps}} · Route to INT {{routeInt}} · NAT {{routeNat}}</span>
+</div>
+<div style="position: relative; width: 100%">
+<div aria-hidden="true" style="position: absolute; inset: 0; display: grid; grid-template-columns: {{gridCols}}; filter: url(#inkbleedMain); pointer-events: none">
+<sc-for list="{{cells}}" as="cell" hint-placeholder-count="121"><div style="{{cell.wallStyle}}"></div></sc-for>
+</div>
+<div role="grid" aria-label="Maze" style="position: relative; display: grid; grid-template-columns: {{gridCols}}; width: 100%">
+<sc-for list="{{cells}}" as="cell" hint-placeholder-count="121">
+<div role="gridcell" aria-label="{{cell.label}}" style="aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; overflow: hidden">
+<sc-if value="{{cell.isTrail}}" hint-placeholder-val="{{ false }}"><span aria-hidden="true" style="color: #3f3b3e; font-size: 18px; line-height: 1">×</span></sc-if>
+<sc-if value="{{cell.isPlayer}}" hint-placeholder-val="{{ false }}">
+<span style="width: 62%; height: 62%; border-radius: 50%; background: #5c2a68; display: flex; align-items: center; justify-content: center">
+<svg viewBox="0 0 24 24" width="62%" height="62%" aria-hidden="true" style="{{cell.arrowStyle}}"><path d="M12 3 L20 20 L12 15.5 L4 20 Z" fill="#f3ecda"></path></svg>
+</span>
+</sc-if>
+<sc-if value="{{cell.isGoalInt}}" hint-placeholder-val="{{ false }}"><span style="width: 84%; height: 62%; border: 3px double #5c2a68; color: #5c2a68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; transform: rotate(-3deg)">INT</span></sc-if>
+<sc-if value="{{cell.isGoalNat}}" hint-placeholder-val="{{ false }}"><span style="width: 84%; height: 62%; border: 3px double #8f2520; color: #8f2520; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; transform: rotate(3deg)">NAT</span></sc-if>
+<sc-if value="{{cell.hasMark}}" hint-placeholder-val="{{ false }}"><span style="{{cell.markStyle}}">{{cell.markText}}</span></sc-if>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+
+<aside style="flex: 0 1 380px; min-width: 280px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 4. NEXT DECISION</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<button type="button" onClick="{{goLeft}}" style="min-height: 72px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☐ Left<span style="font-size: 12px; color: #3f3b3e">← / A</span></button>
+<button type="button" onClick="{{goStraight}}" style="min-height: 72px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☒ Straight<span style="font-size: 12px">↑ / W</span></button>
+<button type="button" onClick="{{goRight}}" style="min-height: 72px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">☐ Right<span style="font-size: 12px; color: #3f3b3e">→ / D</span></button>
+</div>
+<p style="margin: 0; font-size: 15px; color: #3f3b3e">Relative to your arrow. Walls cost two weeks. Click the maze if the keys don't respond.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 5. RECORD OF PROCEEDINGS</h2>
+<ol aria-live="polite" style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{log}}" as="entry" hint-placeholder-count="3">
+<li style="{{entry.style}}">{{entry.text}}</li>
+</sc-for>
+</ol>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">§ 6. KEY</h2>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 15px">
+<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 44px; height: 24px; border: 3px double #5c2a68; color: #5c2a68; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px">INT</span><span>International protection (Geneva / ECHR)</span></div>
+<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 44px; height: 24px; border: 3px double #8f2520; color: #8f2520; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px">NAT</span><span>National humanitarian protection</span></div>
+<sc-for list="{{legend}}" as="it" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; gap: 10px"><span style="{{it.stampStyle}}">{{it.stamp}}</span><span>{{it.name}} {{it.hint}}</span></div>
+</sc-for>
+<div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="flex: none; width: 34px; height: 20px; background: rgba(180,160,140,0.32); border: 2px solid #2b262d"></span><span>Section just re-issued</span></div>
+</div>
+<button type="button" onClick="{{restart}}" style="align-self: flex-start; min-height: 44px; padding: 0 16px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 15px; cursor: pointer">Withdraw &amp; restart</button>
+</div>
+</aside>
+</section>
+</sc-if>
+
+<sc-if value="{{isEnd}}" hint-placeholder-val="{{ false }}">
+<section style="display: flex; flex-direction: column; gap: 22px; max-width: 760px">
+<h2 style="{{endStampStyle}}">{{outcomeTitle}}</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.55"><strong>{{outcomeLead}}</strong> {{outcomeText}}</p>
+<h3 style="margin: 0; font-family: 'Special Elite', monospace; font-weight: 400; font-size: 14px; letter-spacing: 0.12em">WHAT YOU WERE TOLD vs. WHAT YOU FACED</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px">
+<sc-for list="{{reveal}}" as="rv" hint-placeholder-count="3">
+<div style="border: 2px solid #2b262d; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.08em">{{rv.k}}</span>
+<span style="{{rv.vStyle}}">{{rv.v}}</span>
+<span style="font-size: 14px; color: #3f3b3e">{{rv.s}}</span>
+</div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 17px; line-height: 1.55">{{explain}}</p>
+<div style="display: flex; flex-direction: column; gap: 8px; border-top: 2px solid #2b262d; padding-top: 14px">
+<sc-for list="{{summary}}" as="s" hint-placeholder-count="6">
+<div style="display: flex; align-items: baseline; gap: 8px; font-size: 16px"><span>{{s.label}}</span><span style="flex: 1; min-width: 16px; border-bottom: 2px dotted #3f3b3e; transform: translateY(-4px)"></span><span style="font-family: 'Old Standard TT', serif; font-size: 20px; font-weight: 700">{{s.value}}</span></div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 16px; font-weight: 700; border-top: 2px solid #2b262d; padding-top: 14px">Based on European (EU/EFTA) asylum decisions from 2014 analyzed by Arjen Leerkes (WODC, 2015).</p>
+<p style="margin: 0; font-size: 14px; color: #3f3b3e">Your odds are an estimate for an average applicant of your nationality in that country, calculated from the figures in the report below. Source: Leerkes, A. (2015). How (un)restrictive are we? ‘Adjusted’ and ‘expected’ asylum recognition rates in Europe. WODC Cahier 2015-10.</p>
+<div style="display: flex; flex-wrap: wrap; gap: 12px">
+<button type="button" onClick="{{start}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda; font-size: 17px; cursor: pointer">File again</button>
+<button type="button" onClick="{{restart}}" style="min-height: 48px; padding: 0 22px; border: 2px solid #2b262d; background: transparent; color: #2b262d; font-size: 17px; cursor: pointer">Change nationality or country</button>
+</div>
+</section>
+</sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+/* ===== DATA — Leerkes (2015), WODC Cahier 2015-10, first-instance decisions 2014 =====
+   All figures checked against the report PDF: observed rates (Tables 1–2), adjusted rates
+   (Models 3 and 6, Appendix 3 interval midpoints); odds use Appendix 2 Models 2 and 5 (m2/m5 = country,
+   orAll/orInt = nationality vs Afghanistan), as in the report's Appendix 1 step 5. */
+var DESTINATIONS = [
+  { id: 'IT', name: 'Italy',       observed: 0.58, observedInt: 0.32, adjAll: 0.68, adjInt: 0.49, m2: 10.16, m5: 1.86, grid: 11, aid: 1.0,
+    story: 'Italy’s reported rate looks moderate because many of its applicants came from countries with low recognition odds. Adjusted for who applies, it was the most permissive of the larger countries, with national humanitarian protection doing much of the work.' },
+  { id: 'CH', name: 'Switzerland', observed: 0.70, observedInt: 0.40, adjAll: 0.57, adjInt: 0.28, m2: 5.51, m5: 0.40, grid: 11, aid: 1.6,
+    story: 'Switzerland grants much of its protection through national status. On international grounds alone, its adjusted rate is low.' },
+  { id: 'MT', name: 'Malta',       observed: 0.73, observedInt: 0.63, adjAll: 0.57, adjInt: 0.48, m2: 5.26, m5: 1.96, grid: 9,  aid: 1.6,
+    story: 'Malta’s reported rate is higher than its adjusted rate: part of its 73% reflects who applies there rather than how each case is treated.' },
+  { id: 'FI', name: 'Finland',     observed: 0.67, observedInt: 0.58, adjAll: 0.53, adjInt: 0.49, m2: 9.58, m5: 3.89, grid: 11, aid: 1.0,
+    story: 'Finland decides mostly on international grounds. Its adjusted rate is lower than the reported one, but both routes stay usable.' },
+  { id: 'BG', name: 'Bulgaria',    observed: 0.94, observedInt: 0.94, adjAll: 0.48, adjInt: 0.51, m2: 3.22, m5: 2.96, grid: 11, aid: 0.7,
+    story: 'Bulgaria’s 94% mostly reflects that most of its applicants were Syrian. Adjusted for nationality it falls to 48%, and national humanitarian protection is almost never granted.' }
+];
+var NATIONALITIES = [
+  { id: 'SY', name: 'Syria',       orAll: 10.27, orInt: 9.91 },
+  { id: 'ER', name: 'Eritrea',     orAll: 3.80, orInt: 8.34 },
+  { id: 'IQ', name: 'Iraq',        orAll: 1.27, orInt: 1.73 },
+  { id: 'AF', name: 'Afghanistan', orAll: 1.00, orInt: 1.00 },
+  { id: 'IR', name: 'Iran',        orAll: 0.88, orInt: 1.46 },
+  { id: 'SO', name: 'Somalia',     orAll: 0.80, orInt: 1.16 },
+  { id: 'MM', name: 'Myanmar',     orAll: 0.23, orInt: 0.38 },
+  { id: 'NG', name: 'Nigeria',     orAll: 0.07, orInt: 0.11 },
+  { id: 'AL', name: 'Albania',     orAll: 0.05, orInt: 0.06 }
+];
+function toP(odds) { return odds / (1 + odds); }
+function chances(nat, dest) {
+  /* Leerkes (2015), Appendix 1 step 5: odds = country coefficient × nationality odds ratio (same model).
+     Model 2: any positive decision. Model 5: international protection only. */
+  var pAll = toP(dest.m2 * nat.orAll), pInt = toP(dest.m5 * nat.orInt);
+  /* National route = protection on national grounds when international protection is not granted. */
+  return { all: pAll, int: pInt, nat: Math.max(0, (pAll - pInt) / (1 - pInt)) };
+}
+function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+function findIn(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return list[0]; }
+
+var EVENTS = {
+  check: { name: '[Checkpoint]', hint: 'costs 1–3 months', stamp: 'CHK', ink: '#8f2520', look: '',
+    apply: function (s, d) { var m = 1 + Math.random() * 1.5 * (1 + d); s.months += m; return 'Checkpoint: identity screening. +' + fmtM(m); } },
+  docs: { name: '[Documents]', hint: '+1 month now, cheaper steps after', stamp: 'DOC', ink: '#5c2a68', look: '',
+    apply: function (s) { s.months += 1; s.docs = Math.min(3, s.docs + 1); return 'Documents submitted. +1 mo now; the rest of the way costs less.'; } },
+  aid: { name: '[Legal support]', hint: 'saves 1.5 months', stamp: 'AID', ink: '#221e24', look: 'double',
+    apply: function (s) { var m = Math.min(s.months, 1.5); s.months -= m; return 'Legal support found. −' + fmtM(m); } },
+  setback: { name: '[Setback]', hint: 'sends you back, +3 months', stamp: 'RET', ink: '#8f2520', look: 'solid',
+    apply: function (s) {
+      s.months += 3;
+      var back = s.visited.length > 4 ? s.visited[s.visited.length - 4] : s.visited[0];
+      s.pos = { r: Math.floor(back / s.n), c: back % s.n };
+      s.visited = s.visited.slice(0, Math.max(1, s.visited.length - 3));
+      return 'Setback: case returned to an earlier stage. +3 months';
+    } }
+};
+var STEP_BASE = 0.25, STEP_DIFF = 1.3, BLOCK_COST = 0.5, DOC_RELIEF = 0.15;
+var DIRS = [[-1, 0], [0, 1], [1, 0], [0, -1]];
+var BIT = [1, 2, 4, 8];
+var OPP = [2, 3, 0, 1];
+var DIR_NAMES = ['north', 'east', 'south', 'west'];
+var WALL = '#2b262d', WALL_PX = 3;
+var TILT = [-3, 2, -1, 3, -2, 1, -3, 2];
+var KEYS = { ArrowLeft: -1, KeyA: -1, ArrowUp: 0, KeyW: 0, ArrowRight: 1, KeyD: 1 };
+var KEY_FALLBACK = { ArrowLeft: -1, a: -1, A: -1, ArrowUp: 0, w: 0, W: 0, ArrowRight: 1, d: 1, D: 1 };
+
+function fmtM(m) { return m < 1 ? Math.round(m * 4) + ' wk' : m.toFixed(1) + ' mo'; }
+function pct(x) { return Math.round(x * 100) + '%'; }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function inB(n, r, c) { return r >= 0 && c >= 0 && r < n && c < n; }
+function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function nb(n, i, k) { var r = Math.floor(i / n) + DIRS[k][0], c = i % n + DIRS[k][1]; return inB(n, r, c) ? r * n + c : -1; }
+function openWall(w, n, i, k) { var j = nb(n, i, k); if (j < 0) return; w[i] &= ~BIT[k]; w[j] &= ~BIT[OPP[k]]; }
+function closeWall(w, n, i, k) { var j = nb(n, i, k); if (j < 0) return; w[i] |= BIT[k]; w[j] |= BIT[OPP[k]]; }
+function canGo(w, n, i, k) { return nb(n, i, k) >= 0 && !(w[i] & BIT[k]); }
+function stampStyle(key, used, tilt, size) {
+  var e = EVENTS[key];
+  var base = 'display: inline-block; padding: 1px ' + (size > 12 ? 6 : 2) + 'px; font-weight: 700; font-size: ' + size + 'px; line-height: 1.15; white-space: nowrap; transform: rotate(' + TILT[tilt % TILT.length] + 'deg); ';
+  if (used) return base + 'border: 2px solid #77706a; color: #77706a; text-decoration: line-through';
+  if (e.look === 'solid') return base + 'border: 2px solid ' + e.ink + '; background: ' + e.ink + '; color: #f3ecda';
+  if (e.look === 'double') return base + 'border: 3px double ' + e.ink + '; color: ' + e.ink;
+  return base + 'border: 2px solid ' + e.ink + '; color: ' + e.ink;
+}
+function bfs(w, n, from) {
+  var dist = [], prev = [], q = [from], head = 0;
+  for (var i = 0; i < n * n; i++) { dist.push(-1); prev.push(-1); }
+  dist[from] = 0;
+  while (head < q.length) {
+    var x = q[head++];
+    for (var k = 0; k < 4; k++) {
+      if (!canGo(w, n, x, k)) continue;
+      var y = nb(n, x, k);
+      if (dist[y] < 0) { dist[y] = dist[x] + 1; prev[y] = x; q.push(y); }
+    }
+  }
+  return { dist: dist, prev: prev };
+}
+function pathTo(res, target) { var p = [], x = target; while (x >= 0) { p.unshift(x); x = res.prev[x]; } return p; }
+function carveTree(w, n, cells) {
+  var inSet = {}; cells.forEach(function (i) { inSet[i] = true; });
+  var seen = {}, start = cells[Math.floor(Math.random() * cells.length)], stack = [start];
+  seen[start] = true;
+  while (stack.length) {
+    var x = stack[stack.length - 1];
+    var opts = shuffle([0, 1, 2, 3]).filter(function (k) { var y = nb(n, x, k); return y >= 0 && inSet[y] && !seen[y]; });
+    if (!opts.length) { stack.pop(); continue; }
+    var y = nb(n, x, opts[0]);
+    openWall(w, n, x, opts[0]); seen[y] = true; stack.push(y);
+  }
+}
+function addLoops(w, n, cells, count) {
+  for (var t = 0; t < count * 4 && count > 0; t++) {
+    var i = cells[Math.floor(Math.random() * cells.length)], k = Math.floor(Math.random() * 4);
+    if (nb(n, i, k) >= 0 && (w[i] & BIT[k])) { openWall(w, n, i, k); count--; }
+  }
+}
+function generate(n, d) {
+  var w = [], all = [];
+  for (var i = 0; i < n * n; i++) { w.push(15); all.push(i); }
+  carveTree(w, n, all);
+  addLoops(w, n, all, Math.round(n * n * (0.02 + 0.10 * (1 - d))));
+  return w;
+}
+function localD(s, i) {
+  var t = (i % s.n) / (s.n - 1);
+  t = t * t * (3 - 2 * t);
+  return ((1 - t) * s.dNat + t * s.dInt) * (1 - DOC_RELIEF * s.docs);
+}
+function shiftOnce(s, d) {
+  var n = s.n, k = Math.min(n, d < 0.4 ? 3 : 4), h = s.heading, half = Math.floor(k / 2);
+  var side = Math.floor(Math.random() * 3) - 1, perp = (h + 1) % 4;
+  var cr = s.pos.r + DIRS[h][0] * (half + 1) + DIRS[perp][0] * side;
+  var cc = s.pos.c + DIRS[h][1] * (half + 1) + DIRS[perp][1] * side;
+  var r0 = Math.max(0, Math.min(n - k, cr - half)), c0 = Math.max(0, Math.min(n - k, cc - half));
+  var w = s.walls.slice(), cells = [], inSet = {};
+  for (var r = r0; r < r0 + k; r++) for (var c = c0; c < c0 + k; c++) { cells.push(r * n + c); inSet[r * n + c] = true; }
+  cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && inSet[j]) closeWall(w, n, i, q); } });
+  carveTree(w, n, cells);
+  if (Math.random() < 1 - d) addLoops(w, n, cells, 1);
+  if (Math.random() < 0.2 + 0.6 * d) {
+    var opened = [], closed = [];
+    cells.forEach(function (i) { for (var q = 0; q < 4; q++) { var j = nb(n, i, q); if (j >= 0 && !inSet[j]) (w[i] & BIT[q] ? closed : opened).push([i, q]); } });
+    if (opened.length > 1 && closed.length) {
+      var trial = w.slice(), a = opened[Math.floor(Math.random() * opened.length)], b = closed[Math.floor(Math.random() * closed.length)];
+      closeWall(trial, n, a[0], a[1]); openWall(trial, n, b[0], b[1]);
+      if (bfs(trial, n, s.pos.r * n + s.pos.c).dist.every(function (x) { return x >= 0; })) w = trial;
+    }
+  }
+  return { walls: w, changed: cells };
+}
+function headingFor(s, dist) {
+  var mid = (s.n - 1) / 2;
+  if (s.pos.c < mid) return s.goalNat;
+  if (s.pos.c > mid) return s.goalInt;
+  return dist[s.goalInt] <= dist[s.goalNat] ? s.goalInt : s.goalNat;
+}
+function shiftSection(s) {
+  var n = s.n, here = s.pos.r * n + s.pos.c, d = localD(s, here);
+  var dist0 = bfs(s.walls, n, here).dist, target = headingFor(s, dist0);
+  /* The harder the ground you are on, the more often the re-issue lengthens your way.
+     Once your way is already long, re-issues turn gentle so no route becomes endless. */
+  var longWay = dist0[target] >= 1.3 * n;
+  var hostile = !longWay && d > 0.6 && Math.random() < (d - 0.4);
+  var score = function (cand) { var len = bfs(cand.walls, n, here).dist[target]; return longWay ? -len : len; };
+  var dShift = longWay ? d * 0.3 : d;
+  var best = shiftOnce(s, dShift), bestScore = score(best), tries = longWay || hostile ? 2 : 0;
+  for (var t = 0; t < tries; t++) {
+    var cand = shiftOnce(s, dShift), sc = score(cand);
+    if (sc > bestScore) { best = cand; bestScore = sc; }
+  }
+  best.target = target; best.before = dist0;
+  return best;
+}
+function placeLandmarks(s, dest) {
+  var n = s.n, w = s.walls, res = bfs(w, n, s.startI), marks = {}, scale = (n * n) / 121;
+  var used = {}; used[s.startI] = used[s.goalInt] = used[s.goalNat] = true;
+  var take = function (pool) { while (pool.length) { var c = pool.pop(); if (!used[c]) { used[c] = true; return c; } } return -1; };
+  [['nat', s.goalNat, s.dNat], ['int', s.goalInt, s.dInt]].forEach(function (side) {
+    var path = pathTo(res, side[1]), d = side[2], onPath = {};
+    path.forEach(function (i) { onPath[i] = true; });
+    var mine = function (i) { var c = i % n; return side[0] === 'nat' ? c < n / 2 : c >= n / 2; };
+    var route = shuffle(path.slice(2, -1).filter(mine)), dead = [], other = [];
+    for (var i = 0; i < n * n; i++) {
+      if (onPath[i] || used[i] || !mine(i)) continue;
+      var walls = 0; for (var k = 0; k < 4; k++) if (w[i] & BIT[k]) walls++;
+      (walls >= 3 ? dead : other).push(i);
+    }
+    shuffle(dead); shuffle(other);
+    var put = function (key, count, onRouteChance) {
+      for (var t = 0; t < Math.round(count * scale); t++) {
+        var cell = Math.random() < onRouteChance ? take(route) : -1;
+        if (cell < 0) cell = take(dead);
+        if (cell < 0) cell = take(other);
+        if (cell >= 0) marks[cell] = key;
+      }
+    };
+    put('check', 1 + 2.5 * d, 0.3 + 0.6 * d);
+    put('setback', 1.6 * d - 0.3, 0.5);
+    put('aid', (1.8 - 1.4 * d) * dest.aid, 0.7 - 0.6 * d);
+    put('docs', 1, 0);
+  });
+  return marks;
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { phase: 'setup', natId: 'AF', destId: 'IT', now: Date.now(), months: 0, steps: 0 };
+  }
+  componentDidMount() {
+    var self = this;
+    this._timer = setInterval(function () { if (self.state.phase === 'play') self.setState({ now: Date.now() }); }, 500);
+  }
+  componentWillUnmount() { clearInterval(this._timer); }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState && prevState.phase !== 'play' && this.state.phase === 'play') this.focusBoard();
+  }
+  focusBoard() { var el = this._play; if (el && el.focus) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } } }
+  handleKey(e) {
+    if (this.state.phase !== 'play' || e.altKey || e.ctrlKey || e.metaKey) return;
+    var turn = Object.prototype.hasOwnProperty.call(KEYS, e.code) ? KEYS[e.code]
+             : Object.prototype.hasOwnProperty.call(KEY_FALLBACK, e.key) ? KEY_FALLBACK[e.key] : null;
+    if (turn === null) return;
+    e.preventDefault();
+    if (e.repeat) return;
+    this.move(turn);
+  }
+  start() {
+    var nat = findIn(NATIONALITIES, this.state.natId), dest = findIn(DESTINATIONS, this.state.destId), ch = chances(nat, dest);
+    var n = dest.grid, startI = (n - 1) * n + Math.floor(n / 2), t = Date.now();
+    var s = { n: n, dAll: 1 - ch.all, dInt: clamp(1 - ch.int, 0.03, 0.95), dNat: clamp(1 - ch.nat, 0.03, 0.95), ch: ch,
+      startI: startI, goalInt: n - 1, goalNat: 0, pos: { r: n - 1, c: Math.floor(n / 2) }, heading: 0, docs: 0 };
+    s.walls = generate(n, s.dAll);
+    s.marks = placeLandmarks(s, dest);
+    this.setState(Object.assign(s, { phase: 'play', startTs: t, now: t, endTs: null, exit: null,
+      changed: [], used: {}, visited: [startI], months: 0, steps: 0, blocked: 0, met: 0, shifts: 0, lengthened: 0,
+      log: [{ text: '(0) Application lodged. Reach INT (top right) or NAT (top left).' }] }));
+  }
+  move(turn) {
+    var st = this.state;
+    if (st.phase !== 'play') return;
+    var n = st.n;
+    var s = { n: n, dInt: st.dInt, dNat: st.dNat, goalInt: st.goalInt, goalNat: st.goalNat, docs: st.docs,
+      ch: st.ch,
+      pos: st.pos, heading: st.heading, walls: st.walls, visited: st.visited.slice(),
+      months: st.months, steps: st.steps, blocked: st.blocked, met: st.met, shifts: st.shifts, lengthened: st.lengthened,
+      used: Object.assign({}, st.used), log: st.log.slice(0, 5) };
+    var h = (st.heading + turn + 4) % 4, here = s.pos.r * n + s.pos.c, t = Date.now();
+    if (!canGo(st.walls, n, here, h)) {
+      s.months += BLOCK_COST; s.blocked++; s.heading = h;
+      s.log.unshift({ text: '(' + s.steps + ') Wall to the ' + DIR_NAMES[h] + '. Applicant turned. +2 wk' });
+      this.setState(Object.assign(s, { changed: [], now: t })); return;
+    }
+    var i = nb(n, here, h);
+    s.pos = { r: Math.floor(i / n), c: i % n }; s.heading = h; s.steps++;
+    var ld = localD(s, i);
+    s.months += STEP_BASE + STEP_DIFF * ld * ld;
+    s.visited.push(i);
+    var ev = st.marks[i];
+    if (ev && !s.used[i]) { s.used[i] = true; s.met++; s.log.unshift({ text: '(' + s.steps + ') ' + EVENTS[ev].apply(s, ld) }); }
+    if (i === s.goalInt || i === s.goalNat) {
+      this.setState(Object.assign(s, { phase: 'end', exit: i === s.goalInt ? 'int' : 'nat', endTs: t, now: t, changed: [] })); return;
+    }
+    var nowI = s.pos.r * n + s.pos.c, sh = shiftSection(s), before = sh.before;
+    s.walls = sh.walls; s.changed = sh.changed; s.shifts++;
+    var after = bfs(s.walls, n, nowI).dist;
+    if (after[sh.target] > before[sh.target]) s.lengthened++;
+    this.setState(Object.assign(s, { now: t }));
+  }
+
+  renderVals() {
+    var self = this, st = this.state;
+    var natId = st.natId, destId = st.destId;
+    var nat = findIn(NATIONALITIES, natId), dest = findIn(DESTINATIONS, destId);
+    var chip = function (sel) {
+      return 'min-height: 48px; padding: 10px 14px; text-align: left; font-size: 16px; cursor: pointer; white-space: pre; ' +
+        (sel ? 'border: 2px solid #5c2a68; background: #5c2a68; color: #f3ecda;' : 'border: 2px solid #2b262d; background: transparent; color: #2b262d;');
+    };
+    var elapsed = st.startTs ? Math.max(0, Math.floor(((st.endTs || st.now) - st.startTs) / 1000)) : 0;
+    var clock = pad(Math.floor(elapsed / 60)) + ':' + pad(elapsed % 60);
+    var months = st.phase === 'setup' ? 0 : (st.months || 0);
+    var ml = months >= 12 ? Math.floor(months / 12) + ' yr ' + Math.floor(months % 12) + ' mo' : months.toFixed(1) + ' mo';
+    var yrs = Math.floor(months / 12), rest = Math.floor(months % 12), tally = [];
+    while (rest > 0) { var k = Math.min(5, rest); tally.push({ bars: k === 5 ? '||||' : new Array(k + 1).join('|'), full: k === 5 }); rest -= k; }
+
+    var cells = [], n = st.n || dest.grid, routeInt = 0, routeNat = 0;
+    if (st.phase === 'play') {
+      var vis = {}, chg = {};
+      st.visited.forEach(function (i) { vis[i] = true; });
+      st.changed.forEach(function (i) { chg[i] = true; });
+      var here = st.pos.r * n + st.pos.c, res = bfs(st.walls, n, here);
+      routeInt = res.dist[st.goalInt]; routeNat = res.dist[st.goalNat];
+      var fs = n <= 11 ? 12 : 10;
+      for (var i = 0; i < n * n; i++) {
+        var r = Math.floor(i / n), c = i % n, w = st.walls[i];
+        var isP = i === here, isGI = i === st.goalInt, isGN = i === st.goalNat;
+        var mk = !isP && !isGI && !isGN ? st.marks[i] : null, used = mk && st.used[i];
+        var sh = [];
+        if ((w & 1) && !isGI && !isGN) sh.push('inset 0 ' + WALL_PX + 'px 0 0 ' + WALL);
+        if (w & 8) sh.push('inset ' + WALL_PX + 'px 0 0 0 ' + WALL);
+        if (c === n - 1 && (w & 2)) sh.push('inset -' + WALL_PX + 'px 0 0 0 ' + WALL);
+        if (r === n - 1 && (w & 4) && i !== st.startI) sh.push('inset 0 -' + WALL_PX + 'px 0 0 ' + WALL);
+        var bg = chg[i] ? 'rgba(180,160,140,0.32)' : vis[i] ? 'rgba(92,42,104,0.06)' : 'transparent';
+        cells.push({
+          wallStyle: 'transition: background-color 0.35s ease; background: ' + bg + '; box-shadow: ' + (sh.length ? sh.join(', ') : 'none'),
+          isPlayer: isP, isGoalInt: isGI, isGoalNat: isGN, isTrail: vis[i] && !isP && !isGI && !isGN && !mk,
+          hasMark: !!mk, markText: mk ? EVENTS[mk].stamp : '', markStyle: mk ? stampStyle(mk, used, i, fs) : '',
+          arrowStyle: 'transform: rotate(' + (st.heading * 90) + 'deg); transition: transform 0.2s ease',
+          label: isP ? 'You, facing ' + DIR_NAMES[st.heading] : isGI ? 'Exit: international protection' : isGN ? 'Exit: national humanitarian protection' : mk ? EVENTS[mk].name + (used ? ' (used)' : '') : vis[i] ? 'Your path' : 'Corridor'
+        });
+      }
+    }
+    var log = (st.log || []).slice(0, 3).map(function (e, k) {
+      return { text: e.text, style: 'font-size: 16px; line-height: 1.45; ' + (k === 0 ? 'color: #221e24; font-weight: 700' : 'color: #3f3b3e') };
+    });
+    var legend = Object.keys(EVENTS).map(function (k, idx) {
+      var e = EVENTS[k];
+      return { stamp: e.stamp, name: e.name, hint: e.hint, stampStyle: stampStyle(k, false, idx, 13) };
+    });
+
+    var isEnd = st.phase === 'end', ch = st.ch || chances(nat, dest), isInt = st.exit === 'int';
+    var bigV = 'font-family: \'Old Standard TT\', serif; font-size: 32px; font-weight: 700; line-height: 1.1';
+    var easier = ch.int >= ch.nat ? 'international' : 'national';
+    return {
+      isSetup: st.phase === 'setup', isPlay: st.phase === 'play', isEnd: isEnd,
+      showTime: st.phase !== 'setup',
+      showIntro: st.phase !== 'play', titleSize: st.phase === 'play' ? '30px' : '46px', stackGap: st.phase === 'play' ? '14px' : '24px',
+      clock: clock, monthsLabel: months >= 12 ? ml : months.toFixed(1) + ' months',
+      hasYears: yrs > 0, yearsLabel: yrs + (yrs === 1 ? ' yr' : ' yrs') + (months % 12 >= 1 ? ' +' : ''), tally: tally,
+      hudStamp: isEnd ? 'ADJUSTED RECOGNITION RATE ' + pct(dest.adjAll) : 'REPORTED RECOGNITION RATE ' + pct(dest.observed),
+      reportedPct: pct(dest.observed),
+      natItems: NATIONALITIES.map(function (x) {
+        var sel = x.id === natId;
+        return { name: x.name, box: sel ? '☒' : '☐', pressed: sel ? 'true' : 'false', style: chip(sel), pick: function () { self.setState({ natId: x.id }); } };
+      }),
+      destItems: DESTINATIONS.map(function (x) {
+        var sel = x.id === destId;
+        return { name: x.name, box: sel ? '☒' : '☐', pressed: sel ? 'true' : 'false', style: chip(sel), pick: function () { self.setState({ destId: x.id }); } };
+      }),
+      start: function () { self.start(); },
+      restart: function () { self.setState({ phase: 'setup', months: 0, steps: 0, startTs: null, endTs: null }); },
+      playRef: function (el) { self._play = el; },
+      onKey: function (e) { self.handleKey(e); },
+      grabFocus: function (e) { if (!(e.target && e.target.closest && e.target.closest('button'))) self.focusBoard(); },
+      goLeft: function () { self.move(-1); },
+      goStraight: function () { self.move(0); },
+      goRight: function () { self.move(1); },
+      natName: nat.name, destName: dest.name,
+      steps: st.steps || 0, routeInt: routeInt, routeNat: routeNat,
+      gridCols: 'repeat(' + n + ', minmax(0, 1fr))',
+      cells: cells, log: log, legend: legend,
+      outcomeTitle: isInt ? 'INTERNATIONAL PROTECTION' : 'NATIONAL PROTECTION',
+      endStampStyle: 'display: inline-block; align-self: flex-start; margin: 0; border: 4px solid ' + (isInt ? '#5c2a68' : '#8f2520') + '; color: ' + (isInt ? '#5c2a68' : '#8f2520') + '; padding: 8px 18px; font-family: \'Special Elite\', monospace; font-weight: 400; font-size: 28px; letter-spacing: 0.12em; transform: rotate(-4deg); white-space: nowrap',
+      outcomeLead: 'As an applicant from ' + nat.name + ' in ' + dest.name + ', your case took ' + ml + '.',
+      outcomeText: 'You left through the ' + (isInt ? 'international protection (Geneva Convention / ECHR)' : 'national humanitarian protection') + ' exit.',
+      reveal: [
+        { k: 'REPORTED RATE', v: pct(dest.observed), s: 'What you were told about ' + dest.name + ' before applying.', vStyle: bigV + '; text-decoration: line-through; text-decoration-thickness: 2px; color: #3f3b3e' },
+        { k: 'ADJUSTED RATE', v: pct(dest.adjAll), s: dest.name + ' once the mix of applicants is taken into account.', vStyle: bigV },
+        { k: 'YOUR ODDS', v: pct(ch.all), s: 'For someone from ' + nat.name + ' (international ' + pct(ch.int) + ', national ' + pct(ch.nat * (1 - ch.int)) + ').', vStyle: bigV }
+      ],
+      explain: dest.story + ' For ' + nat.name + ', the ' + easier + ' route was the easier way through' + (ch.nat < 0.03 ? ', and the national exit was all but closed.' : '.'),
+      summary: [
+        { label: 'Time in procedure', value: ml },
+        { label: 'Time on file', value: clock },
+        { label: 'Steps taken', value: String(st.steps || 0) },
+        { label: 'Walls hit', value: String(st.blocked || 0) },
+        { label: 'Times your route got longer', value: String(st.lengthened || 0) },
+        { label: 'Stamps received', value: String(st.met || 0) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
