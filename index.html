@@ -187,6 +187,17 @@ return marks;
 }
 var $ = function (id) { return document.getElementById(id); };
 var S = { phase: 'setup', natId: 'AF', destId: 'IT' };
+var runs = 0;
+var PAGE_NAMES = { setup: 'first_page', play: 'maze', end: 'results' };
+function track(name, params) {
+params = params || {};
+window.dataLayer = window.dataLayer || [];
+(function () { window.dataLayer.push(arguments); })('event', name, params);
+try { if (typeof window.va === 'function') window.va('event', { name: name, data: params }); } catch (e) {}
+}
+function runInfo() {
+return { nationality: find(NATIONALITIES, S.natId).name, country: find(DESTINATIONS, S.destId).name, run_number: runs };
+}
 var cellEls = [], wallEls = [];
 function find(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return list[0]; }
 function monthsLabel(m) { return m >= 12 ? Math.floor(m / 12) + ' yr ' + Math.floor(m % 12) + ' mo' : m.toFixed(1) + ' mo'; }
@@ -248,7 +259,7 @@ Object.keys(EVENTS).forEach(function (k, idx) { add(stampHTML(k, false, idx), EV
 add('<span class="swatch" aria-hidden="true"></span>', 'Section just re-issued');
 }
 function note(msg) { S.log.unshift('(' + S.steps + ') ' + msg); S.log = S.log.slice(0, 6); }
-function start() {
+function start(from) {
 var nat = find(NATIONALITIES, S.natId), dest = find(DESTINATIONS, S.destId), ch = chances(nat, dest);
 var n = dest.grid, startI = (n - 1) * n + Math.floor(n / 2);
 Object.assign(S, {
@@ -275,6 +286,8 @@ $('who-nat').textContent = nat.name;
 $('who-dest').textContent = dest.name;
 $('hud-stamp').textContent = 'REPORTED RECOGNITION RATE ' + pct(dest.observed);
 setPhase('play');
+runs++;
+track('asylum_maze_start', Object.assign(runInfo(), { started_from: from || 'first_page' }));
 render();
 try { $('frame').focus({ preventScroll: true }); } catch (e) { $('frame').focus(); }
 }
@@ -375,9 +388,19 @@ renderTally(S.months);
 $('clock').textContent = elapsedLabel();
 $('hud-stamp').textContent = 'ADJUSTED RECOGNITION RATE ' + pct(dest.adjAll);
 setPhase('end');
+track('asylum_maze_results', Object.assign(runInfo(), {
+exit_route: exit === 'int' ? 'international' : 'national',
+months_in_procedure: Math.round(S.months), steps: S.steps,
+play_seconds: Math.round((S.endTs - S.startTs) / 1000)
+}));
 title.focus();
 }
-function backToSetup() { S.startTs = null; S.endTs = null; setPhase('setup'); renderSetup(); }
+function backToSetup(from) {
+var info = Object.assign(runInfo(), { from_page: from });
+if (from === 'maze') { info.months_in_procedure = Math.round(S.months || 0); info.steps = S.steps || 0; }
+track('asylum_maze_back_to_start', info);
+S.startTs = null; S.endTs = null; setPhase('setup'); renderSetup();
+}
 var BTN = { '-1': $('btn-left'), '0': $('btn-straight'), '1': $('btn-right') };
 function flash(turn) {
 var b = BTN[String(turn)]; if (!b) return;
@@ -387,10 +410,16 @@ clearTimeout(b._t); b._t = setTimeout(function () { b.classList.remove('active')
 $('btn-left').addEventListener('click', function () { move(-1); });
 $('btn-straight').addEventListener('click', function () { move(0); });
 $('btn-right').addEventListener('click', function () { move(1); });
-$('start').addEventListener('click', start);
-$('again').addEventListener('click', start);
-$('restart').addEventListener('click', backToSetup);
-$('change').addEventListener('click', backToSetup);
+$('start').addEventListener('click', function () { start('first_page'); });
+$('again').addEventListener('click', function () { start('results'); });
+$('restart').addEventListener('click', function () { backToSetup('maze'); });
+$('change').addEventListener('click', function () { backToSetup('results'); });
+$('js-share').addEventListener('click', function () {
+track('asylum_maze_share', { from_page: PAGE_NAMES[S.phase], method: navigator.share ? 'share_sheet' : 'copy_link' });
+});
+document.querySelector('.portfolio-link').addEventListener('click', function () {
+track('asylum_maze_to_portfolio', { from_page: PAGE_NAMES[S.phase], transport_type: 'beacon' });
+});
 var KEYS = { ArrowLeft: -1, KeyA: -1, ArrowUp: 0, KeyW: 0, ArrowRight: 1, KeyD: 1 };
 var KEY_FALLBACK = { ArrowLeft: -1, Left: -1, a: -1, A: -1, ArrowUp: 0, Up: 0, w: 0, W: 0, ArrowRight: 1, Right: 1, d: 1, D: 1 };
 function onKey(e) {
